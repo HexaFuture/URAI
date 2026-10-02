@@ -1,0 +1,106 @@
+/* SVG vocabulary of the animated method figures. Blue: execution agent, URAI and robot control;
+   warm cream (the HexaFuture factory palette): programming agent and tool evolution; green: validation. */
+.scene-svg { width: 100%; height: auto; overflow: visible; font-family: var(--site-font); }
+.scene-svg text { dominant-baseline: alphabetic; }
+.scene-svg * { transition: fill 260ms ease, stroke 260ms ease, opacity 260ms ease; }
+.scene-svg .no-fade, .scene-svg .no-fade * { transition: none; }
+
+.s-card { fill: #070d12; stroke: var(--line-strong); stroke-width: 1.5; }
+.s-card.exec { stroke: #2b78a6; }
+.s-card.prog { stroke: #8d7c64; }
+.s-card.cand { fill: rgb(220 202 176 / 6%); stroke: #8d7c64; stroke-width: 2; }
+.s-card.valid { stroke: #4b8a6e; }
+.s-card.freeze { fill: rgb(8 127 186 / 9%); stroke: #2b78a6; }
+.s-card.urai { fill: rgb(8 127 186 / 8%); stroke: var(--blue); stroke-width: 2; }
+.s-card.weights { fill: #05090c; stroke: #2a3942; stroke-dasharray: 5 4; }
+.s-card.is-active { stroke: var(--blue-light); filter: drop-shadow(0 0 12px rgb(99 189 234 / 35%)); }
+.s-card.prog.is-active, .s-card.cand.is-active { stroke: var(--warm); filter: drop-shadow(0 0 12px rgb(220 202 176 / 28%)); }
+.s-card.valid.is-active { stroke: var(--good); filter: drop-shadow(0 0 12px rgb(143 211 176 / 25%)); }
+.s-card.valid.is-rejected { stroke: var(--bad); filter: drop-shadow(0 0 12px rgb(229 138 122 / 25%)); }
+.s-divider { stroke: var(--line-strong); stroke-width: 1; }
+
+.t-title { fill: var(--white); font-weight: 600; }
+.t-blue { fill: var(--blue-accent); }
+.t-warm { fill: var(--warm); }
+.t-good { fill: var(--good); }
+.t-bad { fill: var(--bad); }
+.t-body { fill: var(--text-body); }
+.t-sub { fill: var(--text-sub); }
+.t-muted { fill: var(--text-muted); }
+.t-dim { fill: var(--text-dim); }
+.t-bold { font-weight: 600; }
+.t-mark { font-weight: 700; letter-spacing: -.02em; }
+.t-mono { font-family: var(--mono); }
+.t-italic { font-style: italic; }
+
+.s-chip rect { fill: #08131b; stroke: #3f8db9; stroke-width: 1.25; }
+.s-chip text { fill: #a9dcf6; }
+.s-chip.task rect { fill: rgb(220 202 176 / 7%); stroke: var(--warm-shade); stroke-dasharray: 4 3; }
+.s-chip.task text { fill: var(--warm-light); }
+.s-chip.neutral rect { fill: #0b141b; stroke: #33505f; }
+.s-chip.neutral text { fill: var(--text-sub); }
+.s-chip.member rect { fill: #0b141b; stroke: #263842; }
+.s-chip.member text { fill: var(--text-sub); }
+.s-chip.version rect { fill: #08131b; stroke: #2b78a6; }
+.s-chip.version text { fill: #a9dcf6; }
+.s-chip.is-active rect { fill: rgb(99 189 234 / 26%); stroke: var(--blue-light); }
+.s-chip.is-active text { fill: var(--white); }
+.s-chip.task.is-active rect { fill: rgb(220 202 176 / 26%); stroke: var(--warm); }
+.s-chip.task.is-active text { fill: var(--white); }
+
+.s-arrow path { fill: none; stroke: #33576b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.s-arrow polygon { fill: #33576b; }
+.s-arrow.warm path { stroke: #75674f; }
+.s-arrow.warm polygon { fill: #75674f; }
+.s-arrow.dashed path { stroke-dasharray: 7 6; }
+.s-arrow.thin path { stroke-width: 1.5; }
+.s-arrow.is-active path { stroke: var(--blue-light); }
+.s-arrow.is-active polygon { fill: var(--blue-light); }
+.s-arrow.warm.is-active path { stroke: var(--warm); }
+.s-arrow.warm.is-active polygon { fill: var(--warm); }
+.s-arrow.bad.is-active path { stroke: var(--bad); }
+.s-arrow.bad.is-active polygon { fill: var(--bad); }
+
+.s-packet { fill: var(--blue-light); filter: drop-shadow(0 0 6px rgb(99 189 234 / 90%)); transition: none; }
+.s-packet.warm { fill: var(--warm); filter: drop-shadow(0 0 6px rgb(220 202 176 / 80%)); }
+.s-packet.bad { fill: var(--bad); filter: drop-shadow(0 0 6px rgb(229 138 122 / 80%)); }
+
+.s-num circle { fill: var(--blue); }
+.s-num text { fill: var(--white); font-weight: 700; }
+
+.s-stage { fill: #061017; stroke: #24526d; stroke-width: 1.25; }
+.s-stage.is-active { fill: rgb(8 127 186 / 22%); stroke: var(--blue-light); filter: drop-shadow(0 0 10px rgb(99 189 234 / 35%)); }
+.s-glyph { fill: none; stroke: #5f8aa3; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.s-glyph.fill { fill: #5f8aa3; stroke: none; }
+.s-stage-group.is-active .s-glyph { stroke: var(--blue-light); }
+.s-stage-group.is-active .s-glyph.fill { fill: var(--blue-light); stroke: none; }
+
+.s-photo-frame { fill: none; stroke: var(--line-strong); stroke-width: 1.5; }
+.s-photo-frame.is-active { stroke: var(--blue-light); }
+.s-photo-label rect { fill: rgb(0 0 0 / 68%); stroke: none; }
+.s-photo-label text { fill: var(--white); }
+
+.s-phase rect { fill: #0a1218; stroke: #20394a; stroke-width: 1; }
+.s-phase text { fill: var(--text-dim); }
+.s-phase.is-on rect { fill: rgb(99 189 234 / 20%); stroke: var(--blue-light); }
+.s-phase.is-on text { fill: var(--white); }
+.s-phase.task.is-on rect { fill: rgb(220 202 176 / 20%); stroke: var(--warm); }
+
+.s-tick { fill: #1d3442; }
+.s-tick.is-on { fill: var(--blue-light); }
+.s-codeline { fill: #4b4236; }
+.s-codeline.add { fill: #6f8f5d; }
+.s-letter rect { fill: var(--warm-shade); }
+.s-letter text { fill: #0b0b0b; font-weight: 700; }
+.s-letter.is-active rect { fill: var(--warm); }
+.s-row-hl { fill: rgb(220 202 176 / 0%); }
+.s-row-hl.is-active { fill: rgb(220 202 176 / 13%); }
+.s-badge rect { fill: #05090c; stroke: #4a5964; }
+.s-badge text { fill: var(--text-sub); font-weight: 600; }
+.s-icon { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.s-check path { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.s-check.ok path { stroke: var(--good); }
+.s-check.no path { stroke: var(--bad); }
+.s-pending { fill: none; stroke: #33505f; stroke-width: 1.5; }
+.s-bubble { fill: #0b141b; stroke: #3a4d58; stroke-width: 1.25; }
+.s-bubble.is-active { stroke: var(--warm); }

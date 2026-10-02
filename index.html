@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>URAI · Make Code as Policy Great Again</title>
+  <meta name="description" content="URAI (Universal Robot–Agent Interface): frontier agents write, call, and evolve robot tools. Models build executable tools, code handles multi-phase motions, and models decide what to do next.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="HexaFuture">
+  <meta property="og:title" content="Make Code as Policy Great Again: Frontier Agents Write, Call, and Evolve Robot Tools">
+  <meta property="og:description" content="URAI couples a programming agent that writes robot tools with an execution agent that calls them, one complete motion per call, and decides again from fresh observations.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <link rel="stylesheet" href="assets/css/scenes.css">
+  <script type="module" src="assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="https://hexafuture.ai/home/" aria-label="HexaFuture home" translate="no">
+        <img src="assets/img/hexa-lockup.svg" width="1192" height="402" alt="六角未来 · Hexafuture">
+      </a>
+      <nav class="site-nav" aria-label="Sections">
+        <a href="#method"><span class="nav-label">Method</span></a>
+        <a href="#results"><span class="nav-label">Results</span></a>
+        <a href="#citation"><span class="nav-label">Citation</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero wrap" id="top" aria-labelledby="paper-title">
+      <p class="eyebrow"><span>Research</span><span aria-hidden="true">·</span><span>2026</span></p>
+      <h1 class="title" id="paper-title">
+        <span class="title-main shine">Make Code as Policy Great Again</span>
+        <span class="title-sub shine">Frontier Agents Write, Call, and Evolve Robot Tools</span>
+      </h1>
+      <p class="system-line"><b>URAI</b> · Universal Robot–Agent Interface</p>
+      <ul class="authors" aria-label="Authors">
+        <li>Shijia Ge<sup>1</sup></li>
+        <li>Alex Zhou<sup>1</sup></li>
+        <li>Jianshu Zeng<sup>2</sup></li>
+        <li>Yexing Wan</li>
+        <li>Di Wu<sup>3</sup></li>
+        <li>Zelin Zheng<sup>1</sup></li>
+        <li>Yazhe Wang<sup>3</sup></li>
+        <li>Zhiqi Jia<sup>1</sup></li>
+        <li>Xuan Shangguan</li>
+        <li>Jay Zhu<sup>1</sup></li>
+        <li>Yijun Liu<sup>4</sup></li>
+        <li>Lingyu He<sup>1</sup></li>
+        <li>Sihang Wu<sup>1</sup></li>
+        <li>Xiao He<sup>1,†</sup></li>
+        <li>Hongcheng Gao<sup>1,4,†</sup></li>
+      </ul>
+      <p class="affiliations">
+        <span><sup>1</sup>Hexafuture Inc.</span>
+        <span><sup>2</sup>Peking University</span>
+        <span><sup>3</sup>Beijing Institute of Technology</span>
+        <span><sup>4</sup>Tsinghua University</span>
+      </p>
+      <p class="corresponding"><sup>†</sup>Corresponding authors</p>
+      <div class="actions">
+        <span class="btn is-soon" role="link" aria-disabled="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/></svg>
+          Paper <span class="soon">coming soon</span>
+        </span>
+        <span class="btn is-soon" role="link" aria-disabled="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+          arXiv <span class="soon">coming soon</span>
+        </span>
+        <span class="btn is-soon" role="link" aria-disabled="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg>
+          Code <span class="soon">coming soon</span>
+        </span>
+      </div>
+      <p class="summary-line">Models build executable tools, code handles multi-phase motions, and models decide what to do next.</p>
+    </section>
+
+    <section class="teaser wrap" aria-label="Real-robot examples">
+      <div class="teaser-grid">
+        <figure class="photo">
+          <img src="assets/img/teaser/tictactoe-ghost.webp" width="960" height="430" fetchpriority="high"
+            alt="An AgileX robot arm places a block on a tic-tac-toe grid while a person places a green block; fading outlines trace the arm's earlier poses.">
+          <span class="photo-label">Tic-tac-toe vs. a human</span>
+          <code class="code-chip tool-reusable">PnP(…)</code>
+        </figure>
+        <figure class="photo">
+          <img src="assets/img/teaser/bottlecap-ghost.webp" width="960" height="430"
+            alt="Two AgileX robot arms: the left holds a bottle while the right grips its cap; fading outlines trace the right arm's approach.">
+          <span class="photo-label right">Unscrew a bottle cap</span>
+          <code class="code-chip tool-task">bottle_cap_twist(…)</code>
+        </figure>
+      </div>
+      <p class="figure-caption">Frames from the demonstration video on our AgileX dual-arm robot. Fading outlines indicate earlier arm poses within <b>one tool call</b>: the reusable pick-and-place tool (blue) and a task-specific tool written by the programming agent (dashed).</p>
+    </section>
+
+    <section class="section wrap" id="abstract" aria-labelledby="abstract-title">
+      <div class="reading">
+        <div class="section-head">
+          <p class="eyebrow"><span>Overview</span></p>
+          <h2 class="section-title" id="abstract-title">Abstract</h2>
+        </div>
+        <div class="abstract">
+          <p>Frontier models can control robots, but reasoning through every reach, grasp, and retreat makes manipulation slow and token-intensive. We revisit code as policy with a different division of labor: models build executable tools, code handles multi-phase motions, and models decide what to do next. We introduce URAI (Universal Robot–Agent Interface), which couples a programming agent that constructs robot tools with an execution agent that uses them in a feedback loop. The programming agent writes reusable and task-specific tools from task intent and refines them through execution feedback and human guidance. The execution agent selects and parameterizes these tools from current observations; each call runs a complete motion locally before returning control to the agent. Unlike delegating subsequent decisions to a generated program, this design retains model-level decision-making between tool executions. Validated tool revisions persist across episodes without updating foundation-model weights, and a shared GUI and API make the same tools available to humans and agents. Across five RoboDojo tasks and four frozen execution agents, URAI raises aggregate success from <strong>18.0% to 53.0%</strong> relative to direct fingertip control, with the largest gain on Swap Blocks; with the same tools, a program written in advance reaches only <strong>24%</strong> against <strong>56%</strong> for two agents deciding after each call. Three of the four agents also finish episodes <strong>1.3–1.5× faster</strong> with <strong>1.5–1.7× fewer</strong> execution-agent output tokens; DeepSeek-V4-Flash’s cost barely changes. We further evaluate URAI on seven real-world AgileX dual-arm tasks, spanning object manipulation, cloth folding, and human-interactive tic-tac-toe. URAI connects the coding and decision-making capabilities of frontier agents, organizing robot control around reusable tools that agents can both invoke and revise.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap" id="method" aria-labelledby="method-title">
+      <div class="section-head">
+        <p class="eyebrow"><span>01</span><span aria-hidden="true">·</span><span>Method</span></p>
+        <h2 class="section-title" id="method-title">Agents write the tools, the tools run the motions, the agent decides</h2>
+        <p class="section-lead">A programming agent writes and validates robot tools. An execution agent selects a tool and its arguments from the current observation; one call runs a complete multi-phase motion locally, and the agent decides the next step from the feedback. Adaptation happens in the tools, never in the model weights.</p>
+      </div>
+
+      <figure class="scene-figure" id="fig-loop" aria-labelledby="fig-loop-title">
+        <div class="scene-head">
+          <div>
+            <h3 class="scene-title" id="fig-loop-title"><span class="panel">(a)</span>Closed-loop execution</h3>
+            <p class="scene-sub">Within an episode: one tool per model call, run locally.</p>
+          </div>
+          <div class="scene-controls">
+            <button class="scene-btn" type="button" data-scene-toggle aria-pressed="false" aria-label="Pause animation">
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
+            <button class="scene-btn" type="button" data-scene-replay aria-label="Replay animation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="scene-stage" data-scene-stage>
+          <noscript><img src="assets/img/figures/overview-1600.webp" width="1600" height="707" alt="Paper Figure 1: URAI overview."></noscript>
+        </div>
+        <div class="scene-progress" data-scene-progress aria-hidden="true"><span></span></div>
+        <p class="scene-status" data-scene-status>Execution agent → tool call (arm, pixels, …) → URAI: Ground (pixels → 3D), Plan (timed path), Execute (local, 50 Hz) → feedback + new observation → next decision.</p>
+        <figcaption class="figure-caption">Adapted from the paper’s Figures 1(a) and 2(b). The execution agent, a frontier model or a person using the GUI, selects and parameterizes tools from observations and feedback; the shared GUI/API backend grounds, checks and executes each multi-phase motion locally. Photos are demonstration-video frames; fading outlines indicate earlier arm poses within one tool call.</figcaption>
+      </figure>
+
+      <figure class="scene-figure" id="fig-evolution" aria-labelledby="fig-evolution-title">
+        <div class="scene-head">
+          <div>
+            <h3 class="scene-title" id="fig-evolution-title"><span class="panel">(b)</span>Tool programming and persistent evolution</h3>
+            <p class="scene-sub">Between episodes: the programming agent revises φ = (L, C, P); foundation-model weights θ stay fixed.</p>
+          </div>
+          <div class="scene-controls">
+            <button class="scene-btn" type="button" data-scene-toggle aria-pressed="false" aria-label="Pause animation">
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
+            <button class="scene-btn" type="button" data-scene-replay aria-label="Replay animation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="scene-stage" data-scene-stage>
+          <noscript><img src="assets/img/figures/framework-1600.webp" width="1600" height="912" alt="Paper Figure 2: tool development and execution in URAI."></noscript>
+        </div>
+        <div class="scene-progress" data-scene-progress aria-hidden="true"><span></span></div>
+        <p class="scene-status" data-scene-status>Failures and human guidance → programming agent → candidate φ = (L, C, P) → validate (contracts, regression, cost) → freeze → accepted tools in URAI for later episodes. Foundation-model weights θ stay fixed.</p>
+        <figcaption class="figure-caption">Adapted from the paper’s Figure 2(a). φ = (L, C, P) is the external system: the tool collection L, the executable tool code C, and the execution strategy P, meaning the task guidance and call conventions given to the execution agent. Each accepted version is tested and frozen before evaluation. In our experiments the programming agent is Claude Fable 5.1 in Claude Code (Claude Opus 5.5 for one task-specific pouring tool). The failed check is drawn for illustration.</figcaption>
+      </figure>
+
+      <figure class="scene-figure" id="fig-modes" aria-labelledby="fig-modes-title">
+        <div class="scene-head">
+          <div>
+            <h3 class="scene-title" id="fig-modes-title"><span class="panel">(c)</span>What one model call controls</h3>
+            <p class="scene-sub">One schematic episode under each way of driving the robot with a frontier model.</p>
+          </div>
+          <div class="scene-controls">
+            <button class="scene-btn" type="button" data-scene-toggle aria-pressed="false" aria-label="Pause animation">
+              <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+              <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+            </button>
+            <button class="scene-btn" type="button" data-scene-replay aria-label="Replay animation">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="modes" data-scene-stage>
+          <div class="mode" data-mode="steps">
+            <h4 class="mode-name">Direct end-effector control</h4>
+            <div class="mode-track" data-track aria-hidden="true"></div>
+            <p>one call per end-effector command<br>the model decides every step</p>
+            <p class="mode-effect">many calls: slow and token-heavy</p>
+            <p class="mode-count">model calls <output data-count>9</output></p>
+          </div>
+          <div class="mode" data-mode="program">
+            <h4 class="mode-name">Code as Policies</h4>
+            <div class="mode-track" data-track aria-hidden="true"></div>
+            <p>the model writes the program first<br>the code decides what runs next</p>
+            <p class="mode-effect">handles only what the code checks</p>
+            <p class="mode-count">model calls <output data-count>1</output></p>
+          </div>
+          <div class="mode is-ours" data-mode="tools">
+            <h4 class="mode-name">Code as Policy with URAI</h4>
+            <div class="mode-track" data-track aria-hidden="true"></div>
+            <p>one call per complete, timed motion<br>the agent decides each next call</p>
+            <p class="mode-effect">agent in the loop between motions</p>
+            <p class="mode-count">model calls <output data-count>4</output></p>
+          </div>
+        </div>
+        <div class="modes-legend" aria-hidden="true">
+          <span><i class="legend-dot"></i>model call</span>
+          <span><i class="legend-bar"></i>robot motion</span>
+          <span><i class="legend-bar ours"></i>one URAI tool execution</span>
+        </div>
+        <div class="scene-progress" data-scene-progress aria-hidden="true"><span></span></div>
+        <figcaption class="figure-caption">Adapted from the paper’s Figure 1(b); schematic, not to scale. Direct control queries the model for each end-effector command; Code as Policies delegates subsequent decisions to generated code, which may query perception; URAI returns control to the agent between tool executions. Tool executions differ in length because complete motions do not all take the same time: on RoboDojo, URAI used 3.5–10.0 motion calls per episode lasting 29–72 s each, against 21.0–25.6 native calls of 19–20 s.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section wrap" id="results" aria-labelledby="results-title">
+      <div class="section-head">
+        <p class="eyebrow"><span>02</span><span aria-hidden="true">·</span><span>Results</span></p>
+        <h2 class="section-title" id="results-title">More success from fewer, longer calls</h2>
+        <p class="section-lead">Five RoboDojo tasks with four frozen execution agents, seven real-robot tasks on an AgileX dual-arm platform, and one case study of tool evolution. All numbers are from the paper.</p>
+      </div>
+
+      <div class="subsection" id="simulation">
+        <h3 class="subsection-title">Simulation: five RoboDojo tasks, four execution agents</h3>
+        <div class="prose reading">
+          <p>Claude Fable 5.1 and Claude Opus 5.5 in Claude Code, GPT-6 Astra in the Codex CLI, and DeepSeek-V4-Flash in an open-source coding agent control the same simulator either through URAI tool calls or natively, by commanding fingertip targets and gripper values. Each task has one episode per seed 0–4, each in a fresh agent session; only RoboDojo’s own terminal state counts as success.</p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-value"><span class="accent">53.0%</span> <small>vs 18.0%</small></span>
+            <span class="stat-label">Aggregate success</span>
+            <p>Through URAI versus direct fingertip control, over four agents and five tasks. Every agent succeeds more often through URAI.</p>
+          </div>
+          <div class="stat">
+            <span class="stat-value"><span class="accent">56%</span> <small>vs 24%</small></span>
+            <span class="stat-label">Deciding after each call</span>
+            <p>Same tools, two agents (GPT-6 Astra, Claude Opus 5.5): deciding after each call versus one program written in advance and run without the model.</p>
+          </div>
+          <div class="stat">
+            <span class="stat-value"><span class="accent">1.3–1.5×</span> <small>faster</small></span>
+            <span class="stat-label">1.5–1.7× fewer output tokens</span>
+            <p>For three of the four agents. DeepSeek-V4-Flash’s cost barely changes: about 5% less time and 9% fewer tokens.</p>
+          </div>
+        </div>
+
+        <div class="chart reveal" aria-labelledby="chart-title">
+          <p class="chart-title" id="chart-title">Average success rate over the five tasks, per execution agent</p>
+          <p class="chart-note">Five episodes per task (seeds 0–4). The program control was run for GPT-6 Astra and Claude Opus 5.5.</p>
+          <div class="chart-legend" aria-hidden="true">
+            <span><i class="swatch native"></i>native control</span>
+            <span><i class="swatch program"></i>program written in advance</span>
+            <span><i class="swatch urai"></i>URAI</span>
+          </div>
+          <ul class="agent-rows">
+            <li class="agent-row">
+              <span class="agent-name">DeepSeek-V4-Flash<small>open-source coding agent</small></span>
+              <div class="bars">
+                <div class="bar-line native"><span class="bar-track"><span class="bar native" style="--v: 8%"></span></span><span class="bar-val">8.0%</span></div>
+                <div class="bar-line urai"><span class="bar-track"><span class="bar urai" style="--v: 48%"></span></span><span class="bar-val">48.0%</span></div>
+              </div>
+            </li>
+            <li class="agent-row">
+              <span class="agent-name">GPT-6 Astra<small>Codex CLI</small></span>
+              <div class="bars">
+                <div class="bar-line native"><span class="bar-track"><span class="bar native" style="--v: 16%"></span></span><span class="bar-val">16.0%</span></div>
+                <div class="bar-line program"><span class="bar-track"><span class="bar program" style="--v: 24%"></span></span><span class="bar-val">24.0%</span></div>
+                <div class="bar-line urai"><span class="bar-track"><span class="bar urai" style="--v: 52%"></span></span><span class="bar-val">52.0%</span></div>
+              </div>
+            </li>
+            <li class="agent-row">
+              <span class="agent-name">Claude Fable 5.1<small>Claude Code</small></span>
+              <div class="bars">
+                <div class="bar-line native"><span class="bar-track"><span class="bar native" style="--v: 16%"></span></span><span class="bar-val">16.0%</span></div>
+                <div class="bar-line urai"><span class="bar-track"><span class="bar urai" style="--v: 52%"></span></span><span class="bar-val">52.0%</span></div>
+              </div>
+            </li>
+            <li class="agent-row">
+              <span class="agent-name">Claude Opus 5.5<small>Claude Code</small></span>
+              <div class="bars">
+                <div class="bar-line native"><span class="bar-track"><span class="bar native" style="--v: 32%"></span></span><span class="bar-val">32.0%</span></div>
+                <div class="bar-line program"><span class="bar-track"><span class="bar program" style="--v: 24%"></span></span><span class="bar-val">24.0%</span></div>
+                <div class="bar-line urai"><span class="bar-track"><span class="bar urai" style="--v: 60%"></span></span><span class="bar-val">60.0%</span></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <div class="table-wrap">
+          <p class="chart-title" id="table-title">Success, time and tokens per task</p>
+          <div class="table-scroll" role="region" aria-labelledby="table-title" tabindex="0">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Execution agent, condition</th>
+                  <th scope="col">Pour liquid<br>into cup</th>
+                  <th scope="col">Pour balls<br>into vase</th>
+                  <th scope="col">Fold<br>clothes</th>
+                  <th scope="col">Swap<br>blocks</th>
+                  <th scope="col">Stack<br>blocks</th>
+                  <th scope="col">Avg. SR<br>(%) ↑</th>
+                  <th scope="col">Time<br>(min) ↓</th>
+                  <th scope="col">Tokens<br>(k) ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>DeepSeek-V4-Flash, native</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td><td>40.0</td><td>8.0</td><td>21.4</td><td>44.3</td></tr>
+                <tr class="is-urai group-end"><td>DeepSeek-V4-Flash + URAI</td><td>40.0</td><td>60.0</td><td>0.0</td><td>100.0</td><td>40.0</td><td class="best">48.0</td><td class="best">20.2</td><td class="best">40.3</td></tr>
+                <tr><td>GPT-6 Astra, native</td><td>0.0</td><td>0.0</td><td>20.0</td><td>0.0</td><td>60.0</td><td>16.0</td><td>13.8</td><td>6.9</td></tr>
+                <tr><td>GPT-6 Astra, program</td><td>40.0</td><td>40.0</td><td>0.0</td><td>0.0</td><td>40.0</td><td>24.0</td><td class="best">7.0</td><td class="best">4.6</td></tr>
+                <tr class="is-urai group-end"><td>GPT-6 Astra + URAI</td><td>40.0</td><td>60.0</td><td>0.0</td><td>100.0</td><td>60.0</td><td class="best">52.0</td><td>9.4</td><td>4.7</td></tr>
+                <tr><td>Claude Fable 5.1, native</td><td>0.0</td><td>0.0</td><td>20.0</td><td>0.0</td><td>60.0</td><td>16.0</td><td>25.0</td><td>52.8</td></tr>
+                <tr class="is-urai group-end"><td>Claude Fable 5.1 + URAI</td><td>20.0</td><td>40.0</td><td>20.0</td><td>100.0</td><td>80.0</td><td class="best">52.0</td><td class="best">17.4</td><td class="best">30.4</td></tr>
+                <tr><td>Claude Opus 5.5, native</td><td>40.0</td><td>0.0</td><td>40.0</td><td>0.0</td><td>80.0</td><td>32.0</td><td>17.4</td><td>32.3</td></tr>
+                <tr><td>Claude Opus 5.5, program</td><td>0.0</td><td>40.0</td><td>0.0</td><td>20.0</td><td>60.0</td><td>24.0</td><td>15.1</td><td>38.0</td></tr>
+                <tr class="is-urai"><td>Claude Opus 5.5 + URAI</td><td>40.0</td><td>60.0</td><td>40.0</td><td>80.0</td><td>80.0</td><td class="best">60.0</td><td class="best">13.4</td><td class="best">20.0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="scroll-hint" aria-hidden="true">Scroll the table sideways to see every column.</p>
+          <p class="table-note">Success is the official terminal state, five episodes per task (seeds 0–4). Avg. SR is the mean of the five per-task rates. Time and tokens average all episodes, failures included, and count execution-agent output tokens with reasoning. Program: one program over the same tools, written in advance and run without the model; its time includes both phases. Bold: within each agent, the best Avg. SR and the lowest time and tokens. Swap blocks: its tools bundle a task-level place-on-pad procedure with button pressing, so URAI and native control differ in tool semantics as well as call granularity; the program rows share these tools and give the cleaner contrast. Without swap blocks, URAI still leads for every agent, 42.5% against 22.5%. A person driving the same tools through the GUI succeeds in 23 of 25 simulated episodes.</p>
+        </div>
+
+        <div class="prose reading" style="margin-top: 36px">
+          <p><strong>Where the time goes.</strong> URAI replaces many short motion calls with fewer, longer ones: 3.5–10.0 calls per episode lasting 29–72 s each, versus 21.0–25.6 calls of 19–20 s natively. For Claude Fable 5.1, Claude Opus 5.5 and GPT-6 Astra, time outside robot and observation commands falls by about 45%, 38% and 32%. DeepSeek-V4-Flash shows the opposite pattern: its motion calls fall from 25.6 to 10.0, but time outside commands rises from 441 to 509 s. Coarser motion calls alone do not ensure lower total cost; the execution agent’s observation and decision behavior also matters.</p>
+        </div>
+      </div>
+
+      <div class="subsection" id="real-robot">
+        <h3 class="subsection-title">Real robot: seven AgileX dual-arm tasks with GPT-6 Astra</h3>
+        <div class="prose reading">
+          <p>Our AgileX PiPER-X dual-arm system with four RealSense RGB-D cameras runs seven tabletop tasks, all with GPT-6 Astra as the execution agent calling URAI tools. Three tasks have a published result of the same model on other hardware; for these, each URAI number is the mean over three trials, failures included.</p>
+        </div>
+        <div class="compare">
+          <article class="compare-card reveal">
+            <h4>Unscrew bottle cap</h4>
+            <p class="compare-ratio">3.5× <small>faster</small></p>
+            <div class="compare-metric">
+              <span>Time per trial (min)</span>
+              <div class="compare-bars">
+                <div class="bar-line urai"><span class="who">URAI</span><span class="bar-track"><span class="bar urai" style="--v: 28.5%"></span></span><span class="bar-val">5.1</span></div>
+                <div class="bar-line native"><span class="who">GPT-Policy, published (R3)</span><span class="bar-track"><span class="bar native" style="--v: 100%"></span></span><span class="bar-val">17.9</span></div>
+              </div>
+            </div>
+            <p class="compare-success">Success <b>3/3</b> with URAI and <b>3/3</b> for the reference.</p>
+          </article>
+          <article class="compare-card reveal">
+            <h4>Tic-tac-toe against a human</h4>
+            <p class="compare-ratio">2.7× <small>faster</small></p>
+            <div class="compare-metric">
+              <span>Time per game (min)</span>
+              <div class="compare-bars">
+                <div class="bar-line urai"><span class="who">URAI</span><span class="bar-track"><span class="bar urai" style="--v: 36.8%"></span></span><span class="bar-val">5.0</span></div>
+                <div class="bar-line native"><span class="who">GPT-Policy, published (R8)</span><span class="bar-track"><span class="bar native" style="--v: 100%"></span></span><span class="bar-val">13.6</span></div>
+              </div>
+            </div>
+            <p class="compare-success">Success <b>3/3</b> for both; the robot lost none of three games.</p>
+          </article>
+          <article class="compare-card reveal">
+            <h4>Block into bowl</h4>
+            <p class="compare-ratio">2.4× <small>faster</small></p>
+            <p class="compare-ratio">4.7× <small>fewer output tokens</small></p>
+            <div class="compare-metric">
+              <span>Time per trial (min)</span>
+              <div class="compare-bars">
+                <div class="bar-line urai"><span class="who">URAI</span><span class="bar-track"><span class="bar urai" style="--v: 40.9%"></span></span><span class="bar-val">1.0</span></div>
+                <div class="bar-line native"><span class="who">Robocurve, published</span><span class="bar-track"><span class="bar native" style="--v: 100%"></span></span><span class="bar-val">2.5</span></div>
+              </div>
+            </div>
+            <div class="compare-metric">
+              <span>Output tokens per trial</span>
+              <div class="compare-bars">
+                <div class="bar-line urai"><span class="who">URAI</span><span class="bar-track"><span class="bar urai" style="--v: 21.1%"></span></span><span class="bar-val">443</span></div>
+                <div class="bar-line native"><span class="who">Robocurve, published</span><span class="bar-track"><span class="bar native" style="--v: 100%"></span></span><span class="bar-val">2.1k</span></div>
+              </div>
+            </div>
+            <p class="compare-success">Success <b>3/3</b> with URAI; <b>19/20</b> for the reference.</p>
+          </article>
+        </div>
+        <p class="callout">The references are published runs of GPT-6 Astra on other hardware: GPT-Policy’s dual-arm tasks R3 and R8, and Robocurve’s block placement under direct end-effector control on YAM arms with a 25% speed cap and a 20-call budget. There is no same-robot step-by-step baseline, so these ratios are not causal estimates of a speedup. Block-into-bowl time is 61.3 s per trial (shown as 1.0 min); the first bottle-cap trial excludes unmetered diagnosis and repair.</p>
+
+        <div class="solo" aria-label="Tasks without a published reference, ten trials each">
+          <div><b>10/10</b><span>Hot-dog serving</span></div>
+          <div><b>7/10</b><span>Toss blocks into bowl · 91.7% mean progress</span></div>
+          <div><b>10/10</b><span>Pour blocks</span></div>
+          <div><b>8/10</b><span>Fold clothes · 90.0% mean progress</span></div>
+        </div>
+        <p class="table-note">Four tasks have no published same-task reference and are reported for URAI alone, ten trials each; success requires the whole task.</p>
+
+        <figure class="strips" aria-labelledby="strips-caption">
+          <div class="strip-head" aria-hidden="true"><span></span><span>t1</span><span>t2</span><span>t3</span><span>t4</span><span>t5</span><span>t6</span></div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Tic-tac-toe</b><code class="code tool-reusable">PnP(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/tictactoe/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 1 of 6">
+              <img src="assets/img/strips/tictactoe/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 2 of 6">
+              <img src="assets/img/strips/tictactoe/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 3 of 6">
+              <img src="assets/img/strips/tictactoe/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 4 of 6">
+              <img src="assets/img/strips/tictactoe/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 5 of 6">
+              <img src="assets/img/strips/tictactoe/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Tic-tac-toe, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Unscrew bottle cap</b><code class="code tool-task">bottle_cap_twist(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/bottle_cap/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 1 of 6">
+              <img src="assets/img/strips/bottle_cap/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 2 of 6">
+              <img src="assets/img/strips/bottle_cap/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 3 of 6">
+              <img src="assets/img/strips/bottle_cap/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 4 of 6">
+              <img src="assets/img/strips/bottle_cap/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 5 of 6">
+              <img src="assets/img/strips/bottle_cap/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Unscrew bottle cap, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Block into bowl</b><code class="code tool-reusable">PnP(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/block_into_bowl/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 1 of 6">
+              <img src="assets/img/strips/block_into_bowl/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 2 of 6">
+              <img src="assets/img/strips/block_into_bowl/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 3 of 6">
+              <img src="assets/img/strips/block_into_bowl/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 4 of 6">
+              <img src="assets/img/strips/block_into_bowl/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 5 of 6">
+              <img src="assets/img/strips/block_into_bowl/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Block into bowl, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Hot-dog serving</b><code class="code tool-reusable">PnP(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/hotdog/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 1 of 6">
+              <img src="assets/img/strips/hotdog/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 2 of 6">
+              <img src="assets/img/strips/hotdog/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 3 of 6">
+              <img src="assets/img/strips/hotdog/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 4 of 6">
+              <img src="assets/img/strips/hotdog/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 5 of 6">
+              <img src="assets/img/strips/hotdog/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Hot-dog serving, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Toss blocks</b><code class="code tool-task">toss(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/toss_blocks/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 1 of 6">
+              <img src="assets/img/strips/toss_blocks/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 2 of 6">
+              <img src="assets/img/strips/toss_blocks/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 3 of 6">
+              <img src="assets/img/strips/toss_blocks/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 4 of 6">
+              <img src="assets/img/strips/toss_blocks/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 5 of 6">
+              <img src="assets/img/strips/toss_blocks/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Toss blocks, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Pour blocks</b><code class="code tool-task">pour(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/pour_blocks/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 1 of 6">
+              <img src="assets/img/strips/pour_blocks/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 2 of 6">
+              <img src="assets/img/strips/pour_blocks/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 3 of 6">
+              <img src="assets/img/strips/pour_blocks/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 4 of 6">
+              <img src="assets/img/strips/pour_blocks/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 5 of 6">
+              <img src="assets/img/strips/pour_blocks/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Pour blocks, key frame 6 of 6">
+            </div>
+          </div>
+          <div class="strip-row">
+            <div class="strip-label"><b>Fold clothes</b><code class="code tool-reusable">PnP(…)</code></div>
+            <div class="strip-frames">
+              <img src="assets/img/strips/fold_clothes/t1.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 1 of 6">
+              <img src="assets/img/strips/fold_clothes/t2.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 2 of 6">
+              <img src="assets/img/strips/fold_clothes/t3.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 3 of 6">
+              <img src="assets/img/strips/fold_clothes/t4.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 4 of 6">
+              <img src="assets/img/strips/fold_clothes/t5.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 5 of 6">
+              <img src="assets/img/strips/fold_clothes/t6.webp" width="640" height="288" loading="lazy" decoding="async" alt="Fold clothes, key frame 6 of 6">
+            </div>
+          </div>
+          <figcaption class="figure-caption" id="strips-caption">Key frames of the seven AgileX tasks under URAI with GPT-6 Astra, from the initial scene (t1) to completion (t6); chips name the tool called, blue for reusable tools and dashed for task-specific ones. Fold clothes is the demonstration-video run; the other rows are evaluated trials.</figcaption>
+        </figure>
+
+        <figure class="paper-figure">
+          <a class="figure-card" href="assets/img/figures/real-tasks-2400.webp" aria-label="Open the full-resolution figure of the initial scenes">
+            <img src="assets/img/figures/real-tasks-1200.webp" srcset="assets/img/figures/real-tasks-1200.webp 1200w, assets/img/figures/real-tasks-2400.webp 2400w"
+              sizes="(max-width: 1260px) calc(100vw - 80px), 1168px" width="2400" height="895" loading="lazy" decoding="async"
+              alt="Initial scenes of five AgileX dual-arm tasks seen from the front camera: unscrew bottle cap, hot-dog serving, toss blocks into bowl, fold clothes, and pour blocks.">
+          </a>
+          <figcaption class="figure-caption">Initial scenes of five AgileX dual-arm tasks, seen from the front scene camera and cropped to a common scale (paper appendix). Tic-tac-toe and block into bowl are not pictured. Backgrounds are blurred for clarity; the table, arms, and objects are unmodified.</figcaption>
+        </figure>
+      </div>
+
+      <div class="subsection" id="tool-evolution">
+        <h3 class="subsection-title">Tool evolution: revising one tool for fold clothes</h3>
+        <div class="evolution-case">
+          <div class="prose">
+            <p>Steered by the author in natural language, the programming agent revised the existing two-point PnP tool seven times instead of writing a folding routine. The initial version rejected every click on the shirt as a large rigid object; the revisions add sheet pinching with local thickness checks, synchronized dual-arm transport, outward wrist tilt while carrying, vertical release, and a drop height and clearance taken from depth. Each version keeps the call signature, ships with unit tests, and has no branch on seed, garment, or task name.</p>
+            <p>The frozen final version is tested by the four frozen execution agents in fresh sessions, choosing pixels themselves. With this tool, choosing pinch and drop points is the agents’ main difficulty: in most failed GPT-6 Astra and Claude Opus 5.5 episodes, the first sleeve pinch sits at the sleeve tip, where the fingers close on nothing.</p>
+          </div>
+          <div class="case-numbers">
+            <div><b>8 versions</b><span>the initial PnP tool and seven revisions, no weight updates</span></div>
+            <div><b>3 of 20 · 2 of 20</b><span>episodes solved by the four agents on seeds 0–4 and on seeds 5–9</span></div>
+            <div><b>4 of 5</b><span>a person choosing pixels through the GUI, with the same tool</span></div>
+          </div>
+        </div>
+        <p class="callout">Scope. The measurements cover five simulated and seven real-robot tasks with few episodes per cell; five episodes per cell do not establish per-task differences. Tool programming and the author’s steering of it cost unmetered time and tokens that may offset the execution-phase savings, and the interface is validated on one simulator and one position-controlled dual-arm platform without force regulation.</p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="citation" aria-labelledby="citation-title">
+      <div class="reading">
+        <div class="section-head">
+          <p class="eyebrow"><span>03</span><span aria-hidden="true">·</span><span>Citation</span></p>
+          <h2 class="section-title" id="citation-title">BibTeX</h2>
+        </div>
+        <div class="bibtex">
+          <button class="copy-btn" type="button" data-copy="bibtex-text" aria-label="Copy BibTeX">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>
+            <span data-copy-label aria-live="polite">Copy</span>
+          </button>
+<pre id="bibtex-text"><span class="bib-line">@misc{ge2026urai,</span><span class="bib-line field">  title = {Make Code as Policy Great Again: Frontier Agents Write, Call, and Evolve Robot Tools},</span><span class="bib-line field">  author = {Shijia Ge and Alex Zhou and Jianshu Zeng and Yexing Wan and Di Wu and Zelin Zheng and Yazhe Wang and Zhiqi Jia and Xuan Shangguan and Jay Zhu and Yijun Liu and Lingyu He and Sihang Wu and Xiao He and Hongcheng Gao},</span><span class="bib-line field">  year = {2026}</span><span class="bib-line">}</span></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <a class="footer-brand" href="https://hexafuture.ai/home/" aria-label="HexaFuture home" translate="no">
+        <img src="assets/img/hexa-lockup.svg" width="1192" height="402" alt="六角未来 · Hexafuture">
+      </a>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <span class="footer-copy">© 2026 HexaFuture</span>
+      <span class="footer-sep" aria-hidden="true">·</span>
+      <a class="footer-link" href="https://hexafuture.ai/home/">hexafuture.ai</a>
+    </div>
+  </footer>
+</body>
+</html>
