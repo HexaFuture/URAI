@@ -271,8 +271,13 @@ a.btn:hover .btn-arrow, a.btn:focus-visible .btn-arrow { transform: translate(3p
   background: var(--surface);
   aspect-ratio: 960 / 430;
 }
-.photo img { width: 100%; height: 100%; object-fit: cover; }
-.photo-label, .code-chip {
+/* The still sits under its video; the clip starts on the still's frame, so fading the video in and out is the
+   whole transition (assets/js/teaser.js). */
+.photo img, .photo-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.photo-video, .photo-speed { opacity: 0; transition: opacity 700ms var(--ease); }
+.photo.is-video .photo-video, .photo.is-video .photo-speed { opacity: 1; }
+.teaser.is-static .photo-video, .teaser.is-static .photo-speed { display: none; }
+.photo-label, .code-chip, .photo-speed {
   position: absolute;
   display: inline-flex;
   align-items: center;
@@ -284,6 +289,32 @@ a.btn:hover .btn-arrow, a.btn:focus-visible .btn-arrow { transform: translate(3p
 }
 .photo-label { top: 10px; left: 10px; background: rgb(0 0 0 / 66%); color: var(--white); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .photo-label.right { left: auto; right: 10px; }
+.photo-speed {
+  top: 10px;
+  right: 10px;
+  background: rgb(0 0 0 / 66%);
+  color: var(--text-sub);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.photo-label.right ~ .photo-speed { right: auto; left: 10px; }
+.teaser-toggle {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-color: rgb(255 255 255 / 16%);
+  border-radius: 6px;
+  background: rgb(0 0 0 / 55%);
+  color: var(--white);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.teaser-toggle:hover, .teaser-toggle:focus-visible { border-color: var(--line-hover); }
 .code-chip { right: 10px; bottom: 10px; }
 .code, .code-chip { font-family: var(--mono); font-size: 12.5px; }
 .code {
@@ -636,5 +667,6 @@ td.best { font-weight: 700; }
 }
 @media print {
   .site-header, .scene-controls, .scene-progress, .copy-btn, .hex-cursor, .hex-ripple { display: none !important; }
+  .photo-video, .photo-speed, .teaser-toggle { display: none !important; }
   .site-footer { margin-top: 40px; }
 }
