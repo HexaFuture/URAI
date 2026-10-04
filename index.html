@@ -85,27 +85,17 @@
         <figure class="photo">
           <img src="assets/img/teaser/tictactoe-ghost.webp" width="960" height="430" fetchpriority="high"
             alt="An AgileX robot arm places a block on a tic-tac-toe grid while a person places a green block; fading outlines trace the arm's earlier poses.">
-          <video class="photo-video" src="assets/video/teaser/tictactoe.mp4" poster="assets/img/teaser/tictactoe.webp"
-            width="960" height="430" muted playsinline preload="none" aria-hidden="true"></video>
           <span class="photo-label">Tic-tac-toe vs. a human</span>
-          <span class="photo-speed" aria-hidden="true">3×</span>
           <code class="code-chip tool-reusable">PnP(…)</code>
-          <button class="scene-btn teaser-toggle" type="button" data-teaser-toggle aria-pressed="false" aria-label="Pause videos" hidden>
-            <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
-            <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
-          </button>
         </figure>
         <figure class="photo">
           <img src="assets/img/teaser/bottlecap-ghost.webp" width="960" height="430"
             alt="Two AgileX robot arms: the left holds a bottle while the right grips its cap; fading outlines trace the right arm's approach.">
-          <video class="photo-video" src="assets/video/teaser/bottlecap.mp4" poster="assets/img/teaser/bottlecap.webp"
-            width="960" height="430" muted playsinline preload="none" aria-hidden="true"></video>
           <span class="photo-label right">Unscrew a bottle cap</span>
-          <span class="photo-speed" aria-hidden="true">4×</span>
           <code class="code-chip tool-task">bottle_cap_twist(…)</code>
         </figure>
       </div>
-      <p class="figure-caption">Frames from the demonstration video on our AgileX dual-arm robot. Fading outlines indicate earlier arm poses within <b>one tool call</b>: the reusable pick-and-place tool (blue) and a task-specific tool written by the programming agent (dashed). Each frame then plays on in the recording of the same run, at 3× and 4× speed; waits while the agent decides are cut.</p>
+      <p class="figure-caption">Frames from the demonstration video on our AgileX dual-arm robot. Fading outlines indicate earlier arm poses within <b>one tool call</b>: the reusable pick-and-place tool (blue) and a task-specific tool written by the programming agent (dashed).</p>
     </section>
 
     <section class="section wrap" id="abstract" aria-labelledby="abstract-title">
@@ -148,7 +138,7 @@
         </div>
         <div class="scene-progress" data-scene-progress aria-hidden="true"><span></span></div>
         <p class="scene-status" data-scene-status>Execution agent → tool call (arm, pixels, …) → URAI: Ground (pixels → 3D), Plan (timed path), Execute (local, 50 Hz) → feedback + new observation → next decision.</p>
-        <figcaption class="figure-caption">Adapted from the paper’s Figures 1(a) and 2(b). The execution agent, a frontier model or a person using the GUI, selects and parameterizes tools from observations and feedback; the shared GUI/API backend grounds, checks and executes each multi-phase motion locally. Photos are demonstration-video frames; fading outlines indicate earlier arm poses within one tool call.</figcaption>
+        <figcaption class="figure-caption">Adapted from the paper’s Figures 1(a) and 2(b). The execution agent, a frontier model or a person using the GUI, selects and parameterizes tools from observations and feedback; the shared GUI/API backend grounds, checks and executes each multi-phase motion locally. Photos are demonstration-video frames; fading outlines indicate earlier arm poses within one tool call. After the outlines, each photo plays on as the recording of the same run, at 3× and 4× speed; waits while the agent decides are cut.</figcaption>
       </figure>
 
       <figure class="scene-figure" id="fig-evolution" aria-labelledby="fig-evolution-title">

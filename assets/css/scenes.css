@@ -79,6 +79,7 @@
 .s-photo-frame.is-active { stroke: var(--blue-light); }
 .s-photo-label rect { fill: rgb(0 0 0 / 68%); stroke: none; }
 .s-photo-label text { fill: var(--white); }
+.s-photo-label.speed text { fill: var(--text-sub); }
 
 .s-phase rect { fill: #0a1218; stroke: #20394a; stroke-width: 1; }
 .s-phase text { fill: var(--text-dim); }

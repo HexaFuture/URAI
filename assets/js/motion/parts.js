@@ -1,5 +1,6 @@
 /* Building blocks shared by the method figures: agent cards, the URAI box with its Ground -> Plan ->
-   Execute stages and their glyphs, and a photo slot whose ghost trail is wiped in during execution. */
+   Execute stages and their glyphs, and a photo slot whose ghost trail is wiped in during execution and whose
+   still can give way to the recording that continues it. */
 import { clamp, ease } from './engine.js';
 import {
   card, chip, chipRow, el, personIcon, roundedClip, stepNumber, text, textWidth, toggle,
@@ -165,16 +166,23 @@ export function uraiBox(parent, o) {
 
 /**
  * A demonstration frame and its ghost-trail composite (earlier arm poses within one tool call). The ghost is
- * wiped in along the direction of the motion. Returns {set(reveal, ghostOpacity, dim, active)}.
+ * wiped in along the direction of the motion. With `photo.clip`, the still can fade out over the recording that
+ * continues it (laid under the SVG in the frame's box, see clips.js) while a chip gives the recording's speed.
+ * Returns {g, frame, set({reveal, ghostOpacity, still, speed, dim, active, opacity})}.
  */
 export function photoSlot(parent, defs, o, photo) {
   const g = el('g', {}, parent);
   const clip = roundedClip(defs, o.x, o.y, o.w, o.h, 8);
   const body = el('g', { 'clip-path': clip.url }, g);
-  el('image', { href: photo.plain, x: o.x, y: o.y, width: o.w, height: o.h, preserveAspectRatio: 'xMidYMid slice' }, body);
+  const still = el('image', {
+    href: photo.plain, x: o.x, y: o.y, width: o.w, height: o.h, preserveAspectRatio: 'xMidYMid slice', class: 'no-fade',
+  }, body);
   const wipe = roundedClip(defs, o.x, o.y, 0, o.h, 0);
   const ghostWrap = el('g', { 'clip-path': wipe.url }, body);
-  const ghost = el('image', { href: photo.ghost, x: o.x, y: o.y, width: o.w, height: o.h, preserveAspectRatio: 'xMidYMid slice' }, ghostWrap);
+  // Opacities of the still and the trail are eased per frame and must not lag the recording under them.
+  const ghost = el('image', {
+    href: photo.ghost, x: o.x, y: o.y, width: o.w, height: o.h, preserveAspectRatio: 'xMidYMid slice', class: 'no-fade',
+  }, ghostWrap);
   const shade = el('rect', { x: o.x, y: o.y, width: o.w, height: o.h, fill: '#000', opacity: 0, class: 'no-fade' }, body);
   const frame = el('rect', { x: o.x, y: o.y, width: o.w, height: o.h, rx: 8, class: 's-photo-frame' }, g);
   chip(g, {
@@ -185,14 +193,24 @@ export function photoSlot(parent, defs, o, photo) {
     x: o.x + o.w - 10, anchor: 'end', y: o.y + o.h - o.labelH - 10, label: photo.call, size: o.labelSize - 0.5,
     h: o.labelH, cls: photo.kind === 'task' ? 'task' : '', mono: true, weight: 500,
   });
+  // The speed of the recording, in the top corner the label leaves free.
+  const speed = photo.clip ? chip(g, {
+    x: photo.labelSide === 'right' ? o.x + 10 : o.x + o.w - 10, anchor: photo.labelSide === 'right' ? 'start' : 'end',
+    y: o.y + 10, label: photo.clip.speed, size: o.labelSize - 0.5, h: o.labelH, cls: 's-photo-label speed', mono: true,
+    weight: 500,
+  }) : null;
   return {
     g,
-    set({ reveal = 0, ghostOpacity = 1, dim = 0, active = false, opacity = 1 }) {
+    frame,
+    set({ reveal = 0, ghostOpacity = 1, still: stillOpacity = 1, speed: speedOpacity = 0, dim = 0, active = false,
+      opacity = 1 }) {
       const k = clamp(reveal);
       const ww = o.w * k;
       wipe.rect.setAttribute('width', ww.toFixed(1));
       wipe.rect.setAttribute('x', (photo.wipe === 'rtl' ? o.x + o.w - ww : o.x).toFixed(1));
       ghost.setAttribute('opacity', ghostOpacity.toFixed(3));
+      still.setAttribute('opacity', clamp(stillOpacity).toFixed(3));
+      speed?.g.setAttribute('opacity', clamp(speedOpacity).toFixed(3));
       shade.setAttribute('opacity', clamp(dim).toFixed(3));
       toggle(frame, 'is-active', active);
       g.setAttribute('opacity', clamp(opacity).toFixed(3));

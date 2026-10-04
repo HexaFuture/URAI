@@ -2,40 +2,68 @@
    The execution agent reads an observation, selects one tool and fills its arguments; URAI grounds the
    request (pixels -> 3D), plans a timed path and executes the whole multi-phase motion locally (nominal
    50 Hz); feedback and a new observation return to the agent. Two cycles: a reusable PnP call
-   (tic-tac-toe) and a task-specific tool written by the programming agent (unscrew a bottle cap). */
+   (tic-tac-toe) and a task-specific tool written by the programming agent (unscrew a bottle cap). In each,
+   the photo's pose trail (earlier arm poses within the call) wipes in during Execute; then the recording of
+   the same run plays on from the photo's frame in the photo's place (clips.js) before the next cycle. */
 import { Scene, ease, span, within, window01 } from './engine.js';
 import { arrow, el, packet, stepNumber, svgRoot, text, toggle } from './svg.js';
 import { agentCard, phaseTrack, photoSlot, uraiBox } from './parts.js';
+import { SlotClips } from './clips.js';
 
 const PHOTOS = [
   {
     label: 'Tic-tac-toe vs. a human', call: 'PnP(…)', kind: 'reusable', labelSide: 'left', wipe: 'ltr',
     plain: 'assets/img/teaser/tictactoe.webp', ghost: 'assets/img/teaser/tictactoe-ghost.webp',
+    clip: { src: 'assets/video/teaser/tictactoe.mp4', duration: 18.867, speed: '3×' },
   },
   {
     label: 'Unscrew a bottle cap', call: 'bottle_cap_twist(…)', kind: 'task', labelSide: 'right', wipe: 'rtl',
     plain: 'assets/img/teaser/bottlecap.webp', ghost: 'assets/img/teaser/bottlecap-ghost.webp',
+    clip: { src: 'assets/video/teaser/bottlecap.mp4', duration: 17.167, speed: '4×' },
   },
 ];
-const CYCLE = 9;
+// A clip is the recording of the run its still was taken from, starting on the still's frame, sped up, with the
+// waits while the agent decides cut (tools/build_assets.py); `duration` is the file's, in seconds. Within a cycle
+// the pose trail wipes in over Execute (4.2-6.6 s). At CLIP_GATE the full trail is on screen and the scene waits
+// until the clip can play; the trail and the still lift off the clip's first frame until CLIP_START, when the
+// recording plays on. At its end the still returns over the last frame (CLIP_FADE), then CYCLE_TAIL to the next.
+export const CLIP_GATE = 6.9;
+export const CLIP_START = 7.5;
+const CLIP_FADE = 0.6;
+const CYCLE_TAIL = 0.4;
+/** Per photo: when its cycle starts, when its clip ends (in cycle time) and the cycle's length, in seconds. */
+export const CYCLES = [];
+for (const photo of PHOTOS) {
+  const prev = CYCLES[CYCLES.length - 1];
+  const clipEnd = CLIP_START + photo.clip.duration;
+  CYCLES.push({ at: prev ? prev.at + prev.length : 0, clipEnd, length: clipEnd + CLIP_FADE + CYCLE_TAIL });
+}
+export const DURATION = CYCLES[1].at + CYCLES[1].length;
+const inCycle = (i, lines) => lines.map(([t, line]) => [CYCLES[i].at + t, line]);
 const PNP_PHASES = ['approach', 'grasp', 'transfer', 'place', 'retreat'];
 const TASK_PHASE = ['bottle_cap_twist(…): one complete, timed motion'];
 const ARIA = 'Closed-loop execution: the execution agent sends one tool call to URAI, which grounds, plans and '
   + 'executes a complete motion locally, then returns feedback and a new observation to the agent.';
 
 export const STATUS = [
-  [0, 'The execution agent reads the current observation.'],
-  [1.0, 'It selects one tool from the collection L and fills its arguments (arm, pixels, …): PnP(…).'],
-  [2.6, 'URAI grounds the request: selected pixels are back-projected to 3D points from calibrated depth.'],
-  [3.4, 'It plans a timed path (path, speed profile, gripper events) and checks it against the robot’s constraints.'],
-  [4.2, 'The backend executes the complete motion locally at a nominal 50 Hz: approach, grasp, transfer, place, retreat. No model call in between.'],
-  [6.8, 'Feedback and a new observation return to the agent, which decides the next call.'],
-  [CYCLE, 'Tools come validated and frozen from the programming agent; this one is task-specific: bottle_cap_twist(…).'],
-  [CYCLE + 1.0, 'The agent selects it from the current observation and fills its arguments.'],
-  [CYCLE + 2.6, 'URAI grounds the pixels in 3D …'],
-  [CYCLE + 3.4, '… plans a timed path …'],
-  [CYCLE + 4.2, '… and runs the whole motion locally before returning control.'],
-  [CYCLE + 6.8, 'Feedback and a new observation return to the agent for its next decision.'],
+  ...inCycle(0, [
+    [0, 'The execution agent reads the current observation.'],
+    [1.0, 'It selects one tool from the collection L and fills its arguments (arm, pixels, …): PnP(…).'],
+    [2.6, 'URAI grounds the request: selected pixels are back-projected to 3D points from calibrated depth.'],
+    [3.4, 'It plans a timed path (path, speed profile, gripper events) and checks it against the robot’s constraints.'],
+    [4.2, 'The backend executes the complete motion locally at a nominal 50 Hz: approach, grasp, transfer, place, retreat. No model call in between.'],
+    [6.8, 'Feedback and a new observation return to the agent, which decides the next call.'],
+    [CLIP_START + 2, 'The recording of this run plays on from the photo’s frame (3×; waits while the agent decides are cut): one PnP call per move against the human.'],
+  ]),
+  ...inCycle(1, [
+    [0, 'Tools come validated and frozen from the programming agent; this one is task-specific: bottle_cap_twist(…).'],
+    [1.0, 'The agent selects it from the current observation and fills its arguments.'],
+    [2.6, 'URAI grounds the pixels in 3D …'],
+    [3.4, '… plans a timed path …'],
+    [4.2, '… and runs the whole motion locally before returning control.'],
+    [6.8, 'Feedback and a new observation return to the agent for its next decision.'],
+    [CLIP_START + 2, 'The recording plays on from the photo’s frame (4×; waits while the agent decides are cut): the cap comes off, the bottle is set upright, the arms return home.'],
+  ]),
 ];
 export const STATIC_STATUS = 'Execution agent → tool call (arm, pixels, …) → URAI: Ground (pixels → 3D), Plan (timed path), '
   + 'Execute (local, 50 Hz) → feedback + new observation → next decision. Tools are written, validated and frozen by the programming agent.';
@@ -48,7 +76,7 @@ function loopArrows(svg, g) {
   return { call, feedback, failures, frozen };
 }
 
-function buildWide(stage) {
+function buildWide(stage, clips) {
   const svg = svgRoot(stage, 1200, 470, ARIA);
   const defs = el('defs', {}, svg);
   const card = { pad: 20, titleY: 36, titleSize: 19, membersY: 54, chipSize: 15, chipH: 30, descY: 112, descSize: 15 };
@@ -83,6 +111,7 @@ function buildWide(stage) {
   });
 
   const slots = PHOTOS.map((photo, i) => photoSlot(svg, defs, { x: 800, y: i * 196, w: 400, h: 179, labelSize: 14, labelH: 28 }, photo));
+  clips.attach(stage, slots.map((slot) => slot.frame));
   const trunk = arrow(svg, [[760, 378], [781, 378]], { head: 0, cls: 'blue' });
   const branches = [89.5, 285.5].map((cy) => arrow(svg, [[780, 378], [780, cy], [799, cy]], { cls: 'blue', r: 10 }));
   const captions = [
@@ -93,10 +122,10 @@ function buildWide(stage) {
     pnp: phaseTrack(svg, { x: 800, y: 406, w: 400, h: 32, size: 13 }, PNP_PHASES),
     task: phaseTrack(svg, { x: 800, y: 406, w: 400, h: 32, size: 13, task: true }, TASK_PHASE),
   };
-  return makeDraw({ svg, exec, prog, arrows, urai, slots, trunk, branches, captions, tracks, singleSlot: false });
+  return makeDraw({ svg, exec, prog, arrows, urai, slots, clips, trunk, branches, captions, tracks, singleSlot: false });
 }
 
-function buildTall(stage) {
+function buildTall(stage, clips) {
   const svg = svgRoot(stage, 360, 756, ARIA);
   const defs = el('defs', {}, svg);
   const card = { pad: 14, titleY: 28, titleSize: 15, membersY: 50, chipSize: 12.5, descY: 76, descSize: 12.5 };
@@ -131,6 +160,7 @@ function buildTall(stage) {
   text(svg, 36, 379, 'inside one tool call', { size: 12.5, cls: 't-muted' });
 
   const slots = PHOTOS.map((photo) => photoSlot(svg, defs, { x: 0, y: 532, w: 360, h: 161, labelSize: 12.5, labelH: 25 }, photo));
+  clips.attach(stage, slots.map((slot) => slot.frame));
   const branches = [arrow(svg, [[298, 505], [298, 531]], { cls: 'blue' })];
   const captions = [
     text(svg, 0, 714, 'phases of one PnP call', { size: 12, cls: 't-dim' }),
@@ -140,7 +170,7 @@ function buildTall(stage) {
     pnp: phaseTrack(svg, { x: 0, y: 722, w: 360, h: 28, size: 11.5, gap: 5 }, PNP_PHASES),
     task: phaseTrack(svg, { x: 0, y: 722, w: 360, h: 28, size: 11.5, task: true }, ['bottle_cap_twist(…): one complete motion']),
   };
-  return makeDraw({ svg, exec, prog, arrows, urai, slots, trunk: null, branches, captions, tracks, singleSlot: true });
+  return makeDraw({ svg, exec, prog, arrows, urai, slots, clips, trunk: null, branches, captions, tracks, singleSlot: true });
 }
 
 function makeDraw(R) {
@@ -181,11 +211,12 @@ function makeDraw(R) {
       drawFinal();
       return;
     }
-    const cycle = t < CYCLE ? 0 : 1;
-    const tau = t - cycle * CYCLE;
+    const cycle = t < CYCLES[1].at ? 0 : 1;
+    const { at, clipEnd, length } = CYCLES[cycle];
+    const tau = t - at;
     const task = cycle === 1;
 
-    toggle(R.exec.rect, 'is-active', within(tau, 0, 1.8) || within(tau, 7.7, CYCLE));
+    toggle(R.exec.rect, 'is-active', within(tau, 0, 1.8) || within(tau, 7.7, length));
     toggle(R.prog.rect, 'is-active', task && within(tau, 0, 1.0));
     toggle(R.urai.tools.PnP, 'is-active', !task && within(tau, 1.0, 7.8));
     toggle(R.urai.tools.T, 'is-active', task && within(tau, 0.6, 7.8));
@@ -217,10 +248,14 @@ function makeDraw(R) {
       const current = i === cycle;
       let opacity = 1;
       if (R.singleSlot) opacity = current ? ease(tau, 0, 0.6) : 1 - ease(tau, 0, 0.6);
+      // The trail lifts off the clip's first frame (the still itself); the still returns over its last frame.
+      const recording = current && R.clips.live;
       slot.set({
         reveal: current ? ease(tau, 4.2, 6.6) : 0,
-        ghostOpacity: current ? 1 - ease(tau, 6.9, 7.5) : 0,
-        dim: current ? (within(tau, 4.2, 7.8) ? 0 : 0.2) : 0.5,
+        ghostOpacity: current ? 1 - ease(tau, CLIP_GATE, CLIP_START) : 0,
+        still: recording ? 1 - ease(tau, CLIP_GATE, CLIP_START) + ease(tau, clipEnd, clipEnd + CLIP_FADE) : 1,
+        speed: recording ? window01(tau, CLIP_START - 0.3, clipEnd + CLIP_FADE, 0.3) : 0,
+        dim: current ? (within(tau, 4.2, clipEnd + CLIP_FADE) ? 0 : 0.2) : 0.5,
         active: current && executing,
         opacity,
       });
@@ -234,15 +269,20 @@ function makeDraw(R) {
 }
 
 export function mountLoop(figure) {
+  const clips = new SlotClips(PHOTOS.map((photo, i) => ({
+    src: photo.clip.src, poster: photo.plain, duration: photo.clip.duration,
+    gate: CYCLES[i].at + CLIP_GATE, start: CYCLES[i].at + CLIP_START, fade: CLIP_FADE,
+  })));
   return new Scene(figure, {
     id: 'loop',
-    duration: 2 * CYCLE,
-    finalTime: CYCLE - 0.01,
+    duration: DURATION,
+    finalTime: CYCLES[1].at - 0.01,
     status: STATUS,
     staticStatus: STATIC_STATUS,
+    media: clips,
     layouts: [
-      { name: 'wide', minWidth: 940, build: buildWide },
-      { name: 'tall', minWidth: 0, build: buildTall },
+      { name: 'wide', minWidth: 940, build: (stage) => buildWide(stage, clips) },
+      { name: 'tall', minWidth: 0, build: (stage) => buildTall(stage, clips) },
     ],
   }).mount();
 }

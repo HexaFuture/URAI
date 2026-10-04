@@ -3,7 +3,8 @@
    One requestAnimationFrame clock drives every playing figure. A figure plays only while it is on screen,
    loops, and can be paused or replayed. Each figure picks a layout from its own width (wide or tall) and
    rebuilds when it crosses a breakpoint. Under prefers-reduced-motion a figure renders its final state once
-   and stays still. `?freeze=<seconds>` renders every figure at that time, for screenshots. */
+   and stays still. `?freeze=<seconds>` renders every figure at that time, for screenshots. A figure can carry
+   recordings (`media`, see clips.js): while one plays, the figure's clock follows the recording's. */
 
 export const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
 export const lerp = (a, b, u) => a + (b - a) * u;
@@ -61,7 +62,9 @@ export class Scene {
    *   status?: Array<[number, string]>,
    *   layouts: Array<{name: string, minWidth: number, build: (stage: HTMLElement) => (t: number, final: boolean) => void}>}} spec
    *   `layouts` is ordered from the widest; the first whose minWidth fits the stage is used. With
-   *   `keepStage`, the stage's own markup is kept and the layout only binds to it.
+   *   `keepStage`, the stage's own markup is kept and the layout only binds to it. `media`
+   *   ({update(t, {running, active}), advance(t, dt)}) learns every rendered time and whether the clock runs,
+   *   and gives the next time while the clock runs.
    */
   constructor(figure, spec) {
     this.figure = figure;
@@ -76,6 +79,7 @@ export class Scene {
     this.draw = null;
     this.visible = false;
     this.userPaused = false;
+    this.running = false;
     this.isStatic = reducedMotion.matches || FREEZE !== null;
     this.statusText = '';
     scenes.set(spec.id, this);
@@ -105,6 +109,7 @@ export class Scene {
     this.figure.classList.toggle('is-static', this.isStatic);
     if (this.isStatic) {
       playing.delete(this);
+      this.running = false;
       if (FREEZE !== null) this.render(Math.min(FREEZE, this.spec.duration - 1e-3));
       else this.render(this.spec.finalTime, true);
     } else {
@@ -129,6 +134,7 @@ export class Scene {
 
   render(t, final = false) {
     this.t = t;
+    this.spec.media?.update(t, { running: this.running, active: !this.isStatic });
     this.draw?.(t, final);
     if (this.progressEl) this.progressEl.style.transform = `scaleX(${(t / this.spec.duration).toFixed(4)})`;
     if (!this.statusEl) return;
@@ -143,12 +149,15 @@ export class Scene {
   }
 
   advance(dt) {
-    this.render((this.t + dt) % this.spec.duration);
+    const next = this.spec.media ? this.spec.media.advance(this.t, dt) : this.t + dt;
+    this.render(next % this.spec.duration);
   }
 
   /** Start or stop the clock from visibility, the user's pause and the page's visibility. */
   sync() {
     const run = !this.isStatic && this.visible && !this.userPaused && document.visibilityState === 'visible';
+    this.running = run;
+    this.spec.media?.update(this.t, { running: run, active: !this.isStatic });
     if (run) playing.add(this);
     else playing.delete(this);
     if (this.toggleBtn) {

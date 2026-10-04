@@ -1,9 +1,8 @@
-/* URAI project page: header state, section tracking, teaser videos, figure scenes, chart reveal, BibTeX copy
-   and the hexagon cursor. Everything degrades to a readable static page without JavaScript. */
+/* URAI project page: header state, section tracking, figure scenes, chart reveal, BibTeX copy and the
+   hexagon cursor. Everything degrades to a readable static page without JavaScript. */
 import { mountEvolution } from './motion/evolution.js';
 import { mountLoop } from './motion/loop.js';
 import { mountTimeline } from './motion/timeline.js';
-import { mountTeaser } from './teaser.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -40,8 +39,6 @@ function initFigures() {
     const figure = document.getElementById(id);
     if (figure) mount(figure);
   }
-  const teaser = document.querySelector('.teaser');
-  if (teaser) mountTeaser(teaser);
 }
 
 function initReveal() {
