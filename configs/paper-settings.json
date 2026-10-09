@@ -1,0 +1,9 @@
+{
+  "_comment": "Settings of the paper's real-robot trials. They relax the conservative defaults: no tracking guard, no table checks, the fast 'throw' motion profile. Read docs/safety.md first. The tracking limit was not recorded in the trial logs; 0 was the code default at the time. The bottle-cap stages tighten the pose tolerance to 3 mm / 3 deg themselves. Apply with: urai-robot --settings configs/paper-settings.json, or PUT this body (without _comment) to /api/settings.",
+  "motion_profile": "throw",
+  "tracking_limit_deg": 0,
+  "table_checks": false,
+  "home_speed_m_s": 0.8,
+  "pose_tolerance": {"position_mm": 50.0, "orientation_deg": 40.0},
+  "auto_prepare": {"refresh_observation": true, "restore_can": true}
+}

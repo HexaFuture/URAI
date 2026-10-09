@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use URAI, please cite the paper below."
+title: "URAI: Universal Robot–Agent Interface"
+type: software
+license: Apache-2.0
+url: "https://arxiv.org/abs/2609.39018"
+authors:
+  - name: "The URAI authors"
+preferred-citation:
+  type: article
+  title: "Make Code as Policy Great Again: Frontier Agents Write, Call, and Evolve Robot Tools"
+  year: 2026
+  journal: "arXiv preprint arXiv:2609.39018"
+  url: "https://arxiv.org/abs/2609.39018"
+  identifiers:
+    - type: other
+      value: "arXiv:2609.39018"
+  authors:
+    - {given-names: Shijia, family-names: Ge}
+    - {given-names: Alex, family-names: Zhou}
+    - {given-names: Jianshu, family-names: Zeng}
+    - {given-names: Yexing, family-names: Wan}
+    - {given-names: Di, family-names: Wu}
+    - {given-names: Zelin, family-names: Zheng}
+    - {given-names: Yazhe, family-names: Wang}
+    - {given-names: Zhiqi, family-names: Jia}
+    - {given-names: Xuan, family-names: Shangguan}
+    - {given-names: Jay, family-names: Zhu}
+    - {given-names: Yijun, family-names: Liu}
+    - {given-names: Lingyu, family-names: He}
+    - {given-names: Sihang, family-names: Wu}
+    - {given-names: Xiao, family-names: He}
+    - {given-names: Hongcheng, family-names: Gao}

@@ -1,0 +1,42 @@
+{
+  "format": "urai-calibration",
+  "version": 1,
+  "notes": "Nominal example, NOT a measured calibration. It places the right arm base 0.59 m to the right of the left arm base (-y), the head camera 0.75 m above the base plane looking 60 deg down at the workspace, and each wrist camera 65 mm off the tool axis looking along the approach direction. Replace every transform and serial number with the results for your own rig (docs/calibration.md).",
+  "right_arm_base": {
+    "T_world_base_m": [
+      [1.0, 0.0, 0.0, 0.0],
+      [0.0, 1.0, 0.0, -0.59],
+      [0.0, 0.0, 1.0, 0.0],
+      [0.0, 0.0, 0.0, 1.0]
+    ]
+  },
+  "head_camera": {
+    "serial": "EXAMPLE-HEAD",
+    "T_world_camera_m": [
+      [0.0, -0.8660254037844386, 0.5, -0.1],
+      [-1.0, 0.0, 0.0, -0.295],
+      [0.0, -0.5, -0.8660254037844386, 0.75],
+      [0.0, 0.0, 0.0, 1.0]
+    ]
+  },
+  "wrist_cameras": {
+    "left": {
+      "serial": "EXAMPLE-LEFT-WRIST",
+      "T_link6_camera_m": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.065],
+        [0.0, 0.0, 1.0, 0.035],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    },
+    "right": {
+      "serial": "EXAMPLE-RIGHT-WRIST",
+      "T_link6_camera_m": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.065],
+        [0.0, 0.0, 1.0, 0.035],
+        [0.0, 0.0, 0.0, 1.0]
+      ]
+    }
+  }
+}

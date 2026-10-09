@@ -1,0 +1,39 @@
+URAI — Universal Robot–Agent Interface
+Copyright 2026 Hexafuture Inc. and the URAI authors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+-------------------------------------------------------------------------------
+Bundled third-party material
+-------------------------------------------------------------------------------
+
+urai/robot/assets/piper_x_description.urdf
+    PiPER-X robot description from https://github.com/agilexrobotics/agx_arm_urdf
+    (piper_x/urdf/piper_x_description.urdf at commit f539fee0871a), unmodified.
+    Copyright (c) 2026 aalicecc. MIT License; the license text is reproduced in
+    urai/robot/assets/LICENSE.agilex-urdf.
+
+-------------------------------------------------------------------------------
+Third-party Python dependencies (installed separately, not redistributed)
+-------------------------------------------------------------------------------
+
+Core:
+    numpy                    BSD-3-Clause
+    scipy                    BSD-3-Clause
+    fastapi                  MIT        (with starlette BSD-3-Clause, pydantic MIT)
+    uvicorn                  BSD-3-Clause
+    pillow                   MIT-CMU (HPND)
+    opencv-python-headless   Apache-2.0 (its binary wheels bundle FFmpeg under LGPL-2.1; URAI does not
+                             redistribute the wheels)
+
+Robot extra (pip install "urai[robot]"):
+    piper_sdk                MIT          AgileX Robotics PiPER Python SDK
+    python-can               LGPL-3.0     imported dynamically by piper_sdk; not modified or redistributed
+    pyrealsense2             Apache-2.0   Intel RealSense SDK; its binaries bundle libusb (LGPL-2.1)
+
+Development extra (pip install "urai[dev]"):
+    pytest                   MIT
+    httpx                    BSD-3-Clause
+    ruff                     MIT
+
+The web console (urai/static) is original code and loads no third-party scripts, styles or fonts.

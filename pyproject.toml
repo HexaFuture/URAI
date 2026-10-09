@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "urai"
+version = "0.1.0"
+description = "URAI: Universal Robot–Agent Interface for agent-driven real-robot manipulation"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "urai/robot/assets/LICENSE.agilex-urdf"]
+authors = [{name = "The URAI authors"}]
+requires-python = ">=3.10"
+keywords = ["robotics", "manipulation", "agents", "code as policy", "AgileX PiPER"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Intended Audience :: Science/Research",
+]
+dependencies = ["numpy>=1.24", "scipy>=1.10", "fastapi>=0.110", "uvicorn>=0.27", "pillow>=10", "opencv-python-headless>=4.8,<5"]
+
+[project.urls]
+Paper = "https://arxiv.org/abs/2609.39018"
+
+[project.optional-dependencies]
+robot = ["piper_sdk>=0.6.2", "python-can>=4.3", "pyrealsense2>=2.55"]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
+
+[project.scripts]
+urai = "urai.app:main"
+urai-robot = "urai.robot.launch:main"
+
+[tool.setuptools.package-data]
+urai = ["static/*", "robot/assets/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+include = ["urai*"]
+exclude = ["tests*"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+# Pyflakes, syntax errors and bugbear. B905 (zip without strict=) would change behaviour on unequal inputs;
+# B023 flags callbacks that are only ever called inside the loop iteration that defines them; B007 is style.
+select = ["F", "E9", "B"]
+ignore = ["B905", "B023", "B007"]
