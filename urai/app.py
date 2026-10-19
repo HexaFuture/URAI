@@ -21,7 +21,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from .live import LiveStream, live_settings_from_env
-from .routes import drafting, meta, motion, observation
+from .routes import drafting, meta, motion, observation, pouring
 
 STATIC = Path(__file__).parent/'static'
 TOKEN_COOKIE = 'urai_token'
@@ -105,6 +105,7 @@ def create_app(service, token=None):
     app.include_router(observation.build_router(service, live))
     app.include_router(drafting.build_router(service))
     app.include_router(motion.build_router(service))
+    app.include_router(pouring.build_router(service))
     app.mount('/static', StaticFiles(directory=STATIC), name='static')
     return app
 

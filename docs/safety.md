@@ -29,7 +29,8 @@ arbitrary scene objects, and no safety rating. Read this page before the first r
 
 | Request | Effect on the robot |
 | --- | --- |
-| `POST /api/execute` | Runs a previewed plan: automatic approach, the drafted motion, then (after a completed drafted motion) an automatic return home of the arms that moved. Bottle-cap stages that must keep holding the bottle do not return home. A preview older than 120 s is regenerated from the same draft (and a fresh observation, when `auto_prepare.refresh_observation` is on) and then executed in the same call. |
+| `POST /api/skills/<name>/run` | Plans, previews, and executes a skill in one call, under the same checks and holding/home policy. A timeout does not cancel the motion; query its request ID before doing anything else. |
+| `POST /api/execute` | Runs a previewed plan: automatic approach, the drafted motion, then (after a completed drafted motion) an automatic return home of the arms that moved. Bottle-cap, bag-panel, and agent-pouring holding stages do not return home. A preview older than 120 s is regenerated from the same draft (and a fresh observation, when `auto_prepare.refresh_observation` is on) and then executed in the same call. |
 | `POST /api/home` | Plans and immediately executes a joint-space move to the all-zero pose (grippers open first unless `open_grippers` is false). It may re-enable an arm that a protection stop disabled. |
 | `POST /api/tasks` | Queues up to 32 pick-and-place or pick-and-toss items; each is observed, planned, checked and executed in turn without further confirmation. |
 | `POST /api/preview` | **Sends CAN commands** when `auto_prepare.restore_can` is on (default): an arm in drag-teach mode is taken out of it, the arm is put into CAN joint-position mode and the measured pose is held. This happens only after both arms have stood still for 1 s; it commands no motion away from the current pose. |
@@ -82,6 +83,12 @@ close to the base column.
 
 ## 6. Recovering after a stop
 
+- A confirmed empty grasp in an ordinary transfer stops the carry, opens the empty gripper and returns that arm
+  home through the checked motion pipeline. A successful recovery clears the draft and captures a fresh frame;
+  its result is `outcome=empty_grasp`, not a successful transfer. Holding stages do not use this recovery.
+- A keep-gripper, single-arm home may recover from an initial 28–30 mm inter-arm clearance only through a
+  checked path that increases separation, at a speed capped at 0.05 m/s. Other collision checks remain active,
+  and the usual 30 mm margin must be restored before completion.
 - After a protection stop or a cancelled motion, `POST /api/recover` clears the error without moving anything.
 - `POST /api/home` may re-enable a disabled arm; it first waits for both arms to stand still, then re-enables
   holding the measured joints so that no old controller target causes a jump.

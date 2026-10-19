@@ -4,6 +4,9 @@ Every skill module registers itself on import, so adding a skill is a module plu
 """
 from .registry import SKILLS, Skill, boolean, choice, describe_all, get, integer, number, register, stroke_pixels
 from .context import SkillContext, skill_context
+from . import bag  # noqa: F401
+from . import bag_panel  # noqa: F401
+from . import pour_agent  # noqa: F401
 from . import existing    # noqa: F401  pick-place, grasp line and pour
 from . import carry       # noqa: F401  one-stroke carry: grasp line, drawn route and drop point in one draft
 from . import bottle_cap  # noqa: F401  staged bimanual bottle opening: hold, twist, retract and place

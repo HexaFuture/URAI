@@ -71,7 +71,7 @@ def test_recovery_cannot_interrupt_a_running_motion(piper_backend, client_for):
         service.worker.join(10)
 
 
-def test_after_an_empty_grip_home_returns_the_arm_without_opening_the_gripper(piper_backend, tmp_path, client_for):
+def test_empty_grip_returns_home_and_a_later_home_preserves_the_opening(piper_backend, tmp_path, client_for):
     rt = piper_backend.runtime
     service = Service(piper_backend, tmp_path)
     service.observe()
@@ -81,15 +81,19 @@ def test_after_an_empty_grip_home_returns_the_arm_without_opening_the_gripper(pi
                        'arms': {'left': {'path': near_home(service), 'gripper_events': grip}}})
     service.execute(service.preview()['id'])
     service.worker.join(30)
-    assert service.execution['state'] == 'error' and '疑似空抓' in service.execution['error']
-    assert np.abs(rt.joints_deg('left')).max() > 1.
-    closed = rt.gripper_mm('left')
+    assert service.execution['state'] == 'idle' and '夹爪空抓' in service.execution['last_error']
+    assert service.execution['result']['outcome'] == 'empty_grasp'
+    assert service.execution['result']['ready_for_next']
+    assert service.draft == {} and service.preview_data is None
+    np.testing.assert_allclose(rt.joints_deg('left'), 0., atol=.7)
+    opening = rt.gripper_mm('left')
+    assert opening > 60.
     response = client_for(service).post('/api/home', json={'open_grippers': False})
     assert response.status_code == 200, response.text
     service.worker.join(30)
     assert service.execution['state'] == 'completed'
     np.testing.assert_allclose(rt.joints_deg('left'), 0., atol=.7)
     time.sleep(.2)
-    assert rt.gripper_mm('left') == closed and rt.last_gripper_command['left'] == 0.
+    assert rt.gripper_mm('left') == opening and rt.last_gripper_command['left'] == opening
     record = json.loads((tmp_path / f"{response.json()['id']}.json").read_text())
     assert record['preview']['kind'] == 'home' and record['preview']['arms']['left']['gripper_events'] == []

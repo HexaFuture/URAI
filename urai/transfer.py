@@ -502,7 +502,7 @@ def release_orientation(place, jaw_yaw_deg, tilt_deg, base_xy):
 
 
 def transfer_draft(frame, found, placement, route, route_mode, table_z, clearance_m, speed_m_s,
-                   preferred_yaw_deg, release_tilt_deg=0., base_xy=None, top_down=False):
+                   preferred_yaw_deg, release_tilt_deg=0., base_xy=None, top_down=False, grasp_options=None, compact_pick_place=False):
     """Shared arm draft: hover, grasp, lift, carry, lower, release, retract with verified dwells."""
     hover, grasp, arrival, place = (placement[key] for key in ('hover', 'grasp', 'arrival', 'place'))
     # A drop releases in mid-air, so the motion ends at the release point: the final climb back to
@@ -542,7 +542,7 @@ def transfer_draft(frame, found, placement, route, route_mode, table_z, clearanc
               {'s': 1. if dropping else (n-1)/n, 'opening_mm': 70, 'hold_s': .8, 'wait_for_arrival': True,
                'ramp_s': GRIP_RAMP_S}]
     top = found['top']
-    return {'observation_id': frame.id, 'object_width_mm': found['width']*1000,
+    result = {'observation_id': frame.id, 'object_width_mm': found['width']*1000,
             'object_height_mm': (top-table_z)*1000, 'pinch': bool(found.get('pinch')), 'top_down': bool(top_down),
             # Where the fingertips close, not where the wrist goes: the two differ by the arm's own
             # fingertip calibration, and the operator sets the first one.
@@ -555,9 +555,37 @@ def transfer_draft(frame, found, placement, route, route_mode, table_z, clearanc
                     'approach': {'speed_m_s': .8, 'clearance_m': clearance_m}}}
 
 
+    if compact_pick_place:
+        from .pick_place_profile import optimize_pick_place
+        optimized = optimize_pick_place(result, dict(grasp_options=grasp_options, base_xy=base_xy, clearance_m=clearance_m))
+        if optimized is not result:
+            return optimized
+
+    if (grasp_options is not None and base_xy is not None and not top_down
+            and not found.get('pinch') and not release_tilt_deg
+            and np.linalg.norm(grasp[:2]-np.asarray(base_xy)) > GRASP_TILT_START_RADIUS_M):
+        from .far_transfer import refine_transfer
+        result = refine_transfer(result, placement, route, yaw, base_xy, clearance_m, grasp_options)
+    return result
+
+
+def restore_support_frame(placement, plane, table_z):
+    """Convert normalized tabletop path anchors back into observed world heights."""
+    out = dict(placement)
+    for key in ('grasp', 'place', 'hover', 'arrival'):
+        point = np.asarray(placement[key], dtype=float).copy()
+        offset = float(plane_height(plane, point[:2])-table_z)
+        if not np.isfinite(offset) or abs(offset) > .08:
+            raise ValueError('观测桌面与标定高度差过大，需重新观测')
+        point[2] += offset
+        out[key] = point
+    return out
+
+
+
 def pick_place_from_stroke(frame, pixels, table_z=0., clearance_m=.12, speed_m_s=.8,
                            preferred_yaw_deg=0., fingertip_bias_mm=0., *, base_xy=None,
-                           pinch=False, top_down=False, pinch_depth_mm=PINCH_DEPTH_M*1000):
+                           pinch=False, top_down=False, pinch_depth_mm=PINCH_DEPTH_M*1000, grasp_options=None, compact_pick_place=True):
     """Start selects an object, end selects its support surface; lift and carry are automatic.
 
     Interior ink is deliberately ignored. Release remains arrival-gated at the lowered placement pose.
@@ -587,8 +615,11 @@ def pick_place_from_stroke(frame, pixels, table_z=0., clearance_m=.12, speed_m_s
     landing = end if found.get('pinch') else level_point(plane, table_z, frame.pick(*ink[-1], mode='surface'))
     placement = place_transfer(found, landing, table_z, clearance_m, fingertip_bias_mm,
                                pinch_depth_m=float(pinch_depth_mm)/1000)
+    if grasp_options and grasp_options.get('observed_table_frame'):
+        placement = restore_support_frame(placement, plane, table_z)
     return transfer_draft(frame, found, placement, [], 'two-point', table_z, clearance_m, speed_m_s,
-                          preferred_yaw_deg, base_xy=base_xy, top_down=top_down)
+                          preferred_yaw_deg, base_xy=base_xy, top_down=top_down,
+                          grasp_options=grasp_options, compact_pick_place=compact_pick_place)
 
 
 def transfer_between(frame, object_pixel, landing_xyz, table_z=0., clearance_m=.12, speed_m_s=.8,

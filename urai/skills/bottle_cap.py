@@ -396,7 +396,7 @@ def stage_metadata(plan):
     if not entries:return None
     if len(entries)!=1:raise ValueError('拧瓶盖阶段不能与其他轨迹合并执行')
     arm,m=entries[0]
-    allowed={m.get('holder'),m.get('worker')} if m.get('stage') in ('place','twist') and m.get('worker') and (m.get('stage')=='place' or m.get('active_holder')) else {arm}
+    allowed={m.get('holder'),m.get('worker')} if m.get('stage') in ('place','twist','retract') and m.get('worker') and (m.get('stage')=='place' or m.get('active_holder')) else {arm}
     if set(arms)!=allowed:raise ValueError('拧瓶盖阶段不能与其他轨迹合并执行')
     if m.get('stage') not in ('prepare','twist','place','retract','release','inspect') or m.get('holder') not in ('left','right'):
         raise ValueError('无效的拧瓶盖阶段')
@@ -407,10 +407,11 @@ def stage_metadata(plan):
 
 def validate_stage(service,plan,current):
     m=stage_metadata(plan)
-    if m and m['stage'] in ('twist','place'):
-        session=held_session(service,current)
-        if m['id']!=session['id']:raise ValueError('拧盖会话已改变，请重新规划')
-        if m['stage']=='twist' and m.get('active_holder'):
+    if m and m['stage'] in ('twist','place','retract'):
+        if m['stage'] in ('twist','place'):
+            session=held_session(service,current)
+            if m['id']!=session['id']:raise ValueError('拧盖会话已改变，请重新规划')
+        if m['stage'] in ('twist','retract') and m.get('active_holder'):
             # Command the holder throughout the shared clock; only a stationary,
             # closed-jaw reference is accepted as an active cap-turning support.
             spec=plan['input_draft']['arms'][m['holder']];now=current[m['holder']]
@@ -429,6 +430,9 @@ def complete_stage(service,plan):
     m=stage_metadata(plan)
     if not m:
         session=getattr(service,'bottle_cap',None)
+        if (session and session.get('mode')=='upright' and session.get('cap_placed')
+                and plan.get('kind')=='home' and session['holder'] not in plan.get('arms',{})):
+            return
         if session and session.get('state')=='needs_relocalization' and session['holder'] not in plan.get('arms',{}):
             return
         service.bottle_cap=None
@@ -444,8 +448,16 @@ def complete_stage(service,plan):
     elif m['stage'] in ('place','release','inspect'):
         service.bottle_cap=None
     else:
-        service.bottle_cap={**service.bottle_cap,'state':'completed','cycles':m.get('cycles',6),
+        previous_cycles=service.bottle_cap.get('cycles',0) if m.get('upright_phase') else 6
+        service.bottle_cap={**service.bottle_cap,'state':'completed','cycles':m.get('cycles',previous_cycles),
             'validated_observation_id':plan['observation_id']}
+        if m.get('upright_phase'):
+            service.bottle_cap['upright_phase']=m['upright_phase']
+            if 'upright_reference' in m:
+                service.bottle_cap['upright_reference']=copy.deepcopy(m['upright_reference'])
+            if m['upright_phase']=='grasp':service.bottle_cap['cap_removed']=False
+            if m.get('cap_removed'):service.bottle_cap['cap_removed']=True
+            if m.get('cap_placed'):service.bottle_cap['cap_placed']=True
 
 
 def failed_stage(service,plan,reason):

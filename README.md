@@ -10,7 +10,8 @@ the robot at 50 Hz before control returns to the caller.
 This repository contains the **real-robot** implementation for a dual-arm AgileX PiPER-X platform and the tools used
 in the paper's seven real-robot tasks (unscrew bottle cap, tic-tac-toe, block into bowl, hot-dog serving, toss blocks
 into bowl, pour blocks, clothes folding), plus the latest upright-bottle tools. The simulated (RoboDojo) tool collection of the paper is not part of this
-release.
+release. Recent additions include one-call HTTP skill execution, bag-panel lifting, early empty-grasp recovery,
+and an agent-assisted pouring loop that aligns the bottle rim with the receiving cup.
 
 > **Safety first.** URAI moves two position-controlled arms with no force control and no model of scene objects.
 > Read [docs/safety.md](docs/safety.md) before connecting a robot. Keep the hardware emergency stop within reach.
@@ -47,6 +48,7 @@ pip install -e ".[robot,dev]"                       # drop "robot" on a machine 
 
 The core needs `numpy`, `scipy`, `fastapi`, `uvicorn`, `pillow` and `opencv-python-headless`; the `robot` extra adds
 `piper_sdk`, `python-can` and `pyrealsense2`. Node.js ≥ 20 is only needed to run the console's tests.
+Install `.[agent]` as well to use the optional `scripts/pour_agent.py` HTTP client.
 
 ## Quick start without hardware
 
@@ -90,7 +92,12 @@ the hardware runtime of this release is a new implementation and has not yet bee
 **In the console**, choose an arm and a tool, draw on the camera picture (for `pick_place`: from the object to a free
 spot on the table), check the preview and execute. The console and an agent use the same endpoints.
 
-**From an agent or a script**, the loop is observe → tool → preview → execute → poll:
+**From an agent or a script**, a single `POST /api/skills/<name>/run` can plan, check, execute, and wait for a
+skill. Supply the current `observation_id`, the usual skill arguments, a unique `request_id`, and `wait_s`
+(0–120 seconds). Query `GET /api/skill-runs/<request_id>` after a timeout; do not create another action to retry
+an uncertain execution. See [one-call skills](docs/agent-one-call-skills.md).
+
+The separate observe → tool → preview → execute → poll sequence remains available:
 
 ```sh
 H=http://127.0.0.1:7860
@@ -114,6 +121,8 @@ arguments (ranges and defaults) and limits. An agent needs nothing else to start
 | `grasp_line` | a short line across the object | grasp along a drawn closing axis, or release at a point |
 | `carry_line` | one stroke: grasp line, then the route | grasp, carry along a drawn route at a safe height, put down |
 | `pour` | cup → container | side grasp, tilt over the container, return the cup |
+| `pour_agent_prepare` + `/api/pour-agent/*` | source point, then rim landmarks | grasp and hold, align from fresh images, pour in bounded steps; [workflow](docs/agent-pouring.md) |
+| `bag_flap_grasp` / `bag_panel_lift` | a short line on the upper panel | grasp the upper layer, lift, and hold the opening; [workflow](docs/agent-bag-opening.md) |
 | `bottle_cap_prepare` / `_twist` / `_retract` / `_place` | a point on the cap | two-arm cap unscrewing in stages |
 | `bottle_upright_prepare` / `_twist` / `_retract` / `_release`, `bottle_body_recenter` | a point on the cap or body | upright bottle handling and cap turning |
 | toss queue (`POST /api/tasks`) | objects + drop point | pick and throw (overhand or sidearm) or place, item after item |
@@ -140,8 +149,8 @@ URAI_HARDWARE_TESTS=1 pytest -m hardware tests/hardware                       # 
 URAI_HARDWARE_TESTS=1 URAI_HARDWARE_MOTION=1 pytest -m hardware tests/hardware # on the robot, moves the arms
 ```
 
-The test suite uses no mocks: planning tests run on the real arm models, execution tests drive the real backend
-against the kinematic simulator, and API tests call the real application.
+Planning tests run on the real arm models, execution tests drive the backend against the kinematic simulator,
+and API tests call the real application. Focused unit tests additionally isolate transport and perception inputs.
 
 ## License
 

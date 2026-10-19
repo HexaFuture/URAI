@@ -61,11 +61,14 @@ def build_router(service):
             current = service.backend.state()
             require_unmoved(service, current, '画抓放线')
             model, base_xy, table_z_m, bias_mm = arm_geometry(service, arm, current)
+            from ..skills.context import skill_context
+            from ..far_transfer import grasp_options
+            options = grasp_options(skill_context(service, arm))
             return pick_place_from_stroke(
                 service.frame, data.get('pixels'), table_z=table_z_m, fingertip_bias_mm=bias_mm,
                 preferred_yaw_deg=current[arm]['rpy_deg'][2], base_xy=base_xy,
                 clearance_m=data.get('clearance_m', .12), speed_m_s=data.get('speed_m_s', .8),
-                pinch=bool(data.get('pinch')), top_down=bool(data.get('top_down')),
+                grasp_options=options, pinch=bool(data.get('pinch')), top_down=bool(data.get('top_down')),
                 **({} if data.get('pinch_depth_mm') is None else {'pinch_depth_mm': float(data['pinch_depth_mm'])}))
 
     @router.post('/api/pour')
@@ -115,6 +118,9 @@ def build_router(service):
                     saved_draft['expected_revision'] = data['expected_revision']
                 result = {**result, 'revision': service.set_draft(saved_draft, merge=bool(data.get('merge')))['revision']}
             return result
+
+    from ..skill_calls import install_skill_calls
+    install_skill_calls(router, service, run_skill)
 
     @router.post('/api/objects')
     def objects(data: dict):

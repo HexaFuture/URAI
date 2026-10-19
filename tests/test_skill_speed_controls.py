@@ -4,7 +4,13 @@ from test_skills import CUP_PIXEL, client_with_scene, stroke
 from urai.skills import describe_all
 
 #: (speed_m_s, approach_speed_m_s) defaults: the registry's 0.8 m/s, or a skill's own slower declaration.
-SPEED_DEFAULTS = {'bottle_cap_prepare': (.10, .10), 'bottle_cap_twist': (.08, .08), 'bottle_cap_place': (.08, .04)}
+SPEED_DEFAULTS = {
+    'bottle_cap_prepare': (.10, .10), 'bottle_cap_twist': (.08, .08), 'bottle_cap_place': (.08, .04),
+    'bag_flap_grasp': (.15, .12), 'bag_panel_lift': (.15, .12),
+    'bottle_upright_prepare': (.05, .05), 'bottle_upright_grasp_cap': (.02, .02),
+    'bottle_upright_twist': (.03, .03), 'bottle_upright_take_cap': (.01, .01),
+    'bottle_upright_place_cap': (.04, .04), 'bottle_upright_return': (.04, .04),
+}
 
 
 def test_default_profile_and_catalogue_speeds():

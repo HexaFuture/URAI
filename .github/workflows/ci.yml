@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "20"
       - name: Install
-        run: pip install -e ".[robot,dev]"
+        run: pip install -e ".[robot,dev,agent]"
       - name: Lint
         run: ruff check urai tests
       - name: Python tests (hardware tests are skipped)

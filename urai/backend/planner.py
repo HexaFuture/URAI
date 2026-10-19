@@ -69,9 +69,14 @@ class PiperPlanner:
             why = why or (model.table_check(q) if self.table_checks else None) or self_collision_reason(model, q)
             if why:
                 raise ValueError(f'{a}: {why}')
-        why = inter_arm_reason(self.models['left'], qa, self.models['right'], qb)
-        if why:
-            raise ValueError(why)
+        recovery = getattr(self, '_home_clearance_recovery', None)
+        if recovery is not None:
+            clearance, _, _ = capsules_clearance_mm(self.models['left'].body_capsules(qa), self.models['right'].body_capsules(qb))
+            recovery.check(clearance)
+        else:
+            why = inter_arm_reason(self.models['left'], qa, self.models['right'], qb)
+            if why:
+                raise ValueError(why)
 
     def _feedback_geometry(self, qa, qb):
         """One capsule construction per changed arm, shared by self/inter-arm checks.
@@ -104,7 +109,10 @@ class PiperPlanner:
                 raise ValueError(f'{a}: {model.name} self-collision: {mover} vs {target} (clearance {clearance:.0f} mm)')
         self._feedback_capsules = cache
         clearance, part, other_part = capsules_clearance_mm(caps['left'], caps['right'])
-        if clearance < INTER_ARM_MARGIN_MM:
+        recovery = getattr(self, '_home_clearance_recovery', None)
+        if recovery is not None:
+            recovery.check(clearance)
+        elif clearance < INTER_ARM_MARGIN_MM:
             left, right = self.models['left'].name, self.models['right'].name
             raise ValueError(f"{left} would hit the {right} arm: {left} {part} vs {right} {other_part} "
                              f"(clearance {clearance:.0f} mm < {INTER_ARM_MARGIN_MM:.0f}); the {right} arm is in the way — "
@@ -272,8 +280,25 @@ class PiperPlanner:
         with self._exclusive():
             self.validate_start(start)
             report(stage='approach', candidate=1, candidates=1, route='关节空间回零', done=0, total=1, arm=None)
+            from ..home_recovery import HomeClearanceRecovery
+            from urai.robot.arm_model import capsules_clearance_mm, INTER_ARM_MARGIN_MM
+            clearance, _, _ = capsules_clearance_mm(*[self.models[a].body_capsules(start[a]['joints_deg']) for a in ARMS])
+            recovery = None
+            if clearance < INTER_ARM_MARGIN_MM:
+                if len(arms) != 1 or open_grippers:
+                    raise ValueError('近距离恢复仅允许单臂保持夹爪回位')
+                recovery = HomeClearanceRecovery(clearance)
+                speed_m_s = min(speed_m_s, .05)
+                motion_profile = 'fine'
             compiled = {arm: self._home_arm(arm, start[arm], open_grippers=open_grippers, speed_m_s=speed_m_s) for arm in arms}
-            result = self._plan(compiled, start, pose_tolerance, progress=report, motion_profile=motion_profile)
+            self._home_clearance_recovery = recovery
+            try:
+                result = self._plan(compiled, start, pose_tolerance, progress=report, motion_profile=motion_profile)
+                if recovery is not None:
+                    recovery.finish()
+                    result['home_clearance_recovery'] = {'start_mm': float(clearance), 'arm': arms[0]}
+            finally:
+                self._home_clearance_recovery = None
             result['approach_routes'] = {arm: 'home' for arm in arms}
             result['notes'].insert(0, home_note(arms, '关节空间线性回到全零位'))
             return result
@@ -513,7 +538,7 @@ class PiperPlanner:
                       else np.tile(np.asarray(start[a]['joints_deg'], dtype=float), (len(grid), 1))) for a in ARMS}
         kwargs = {'joint_bounds': initial_bounds} if initial_bounds else {}
         report(stage='collision', arm=None, done=0, total=len(grid))
-        if self.planner_pool is not None:
+        if self.planner_pool is not None and getattr(self, '_home_clearance_recovery', None) is None:
             failure = self.planner_pool.check(joints['left'], joints['right'], self.table_checks, initial_bounds,
                                               progress=lambda done: report(stage='collision', arm=None, done=done, total=len(grid)))
             if failure is not None:

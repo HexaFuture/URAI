@@ -18,6 +18,9 @@ class Frame:
     id: str = field(default_factory=lambda: uuid.uuid4().hex)
     timestamp: float = field(default_factory=time.time)
 
+    sensor_timestamp: float | None = None
+    sensor_sequence: int | None = None
+
     def world_points(self):
         v, u = np.indices(self.depth.shape)
         z = np.where(np.isfinite(self.depth) & (self.depth > 0), self.depth, np.nan)

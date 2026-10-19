@@ -91,16 +91,16 @@ def test_a_verified_grip_carries_the_block(piper_backend):
     assert scene.pose('red_block')[2, 3] > resting+.05
 
 
-def test_an_empty_grip_is_reported_within_three_seconds_and_the_arm_held(piper_backend):
+def test_an_empty_grip_is_reported_promptly_and_the_arm_held(piper_backend):
     rt = piper_backend.runtime
     plan, _ = plan_drafts(piper_backend, {'left': pick(FREE_SPOT_XY, FREE_SPOT_YAW)})
     check_at = plan['arms']['left']['gripper_events'][1]['hold_end_time_s']
     recorder = Recorder(rt)
-    with pytest.raises(RuntimeError, match='夹爪疑似空抓'):
+    with pytest.raises(RuntimeError, match='夹爪空抓'):
         run(piper_backend, plan, recorder=recorder)
     failed = time.monotonic()-recorder.began
     checking = recorder.first(lambda row: row.t >= check_at-1e-9)
-    assert 3. <= failed-checking.wall <= 3.3
+    assert .25 <= failed-checking.wall <= .8
     assert rt.gripper_mm('left') == 0. and rt.arms['left'].held_object() is None
     tcp = piper_backend.models['left'].fk_tcp_world(rt.joints_deg('left'))
     assert tcp[2, 3] < .02                              # still at the grasp height: the lift never started

@@ -3,9 +3,11 @@
 const {spawn} = require('node:child_process');
 const net = require('node:net');
 const path = require('node:path');
+const fs = require('node:fs');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const PYTHON = path.join(ROOT, '.venv', 'bin', 'python');
+const VENV_PYTHON = path.join(ROOT, '.venv', 'bin', 'python');
+const PYTHON = process.env.URAI_TEST_PYTHON || (fs.existsSync(VENV_PYTHON) ? VENV_PYTHON : 'python3');
 
 function freePort() {
   return new Promise((resolve, reject) => {

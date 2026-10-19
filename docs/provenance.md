@@ -3,6 +3,14 @@
 This repository is a cleaned-up release of the authors' internal real-robot code. It starts a new history; the
 internal history is not published.
 
+## October 19 update
+
+The subsequent working-tree additions are adapted to this repository's standalone backend and authenticated
+HTTP routes: one-call skill execution, bag flap/panel handling, compact and far-reach transfers, empty-grasp
+recovery, upright cap removal and placement, and image-guided pouring. The original private runtime, calibration,
+credentials, and execution recordings are not included. The public backend adaptation is covered by offline and
+simulator tests; these checks do not establish physical performance on a calibrated robot.
+
 ## Source snapshot
 
 - Taken from the internal development checkout's **working tree** on 2026-10-08 at 11:30:04 UTC.

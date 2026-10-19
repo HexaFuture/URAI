@@ -59,7 +59,15 @@ def test_upright_stages_preserve_the_holder_and_release_clears_the_session():
     np.testing.assert_allclose(r @ session['axis_local'], [0., 0., 1.], atol=1e-9)
     cap = np.asarray(holder['xyz']) + r @ session['cap_local']
     [pixel] = observe_points(service, cap)
-    _, preview = draft(client, service, 'bottle_upright_twist', pixel, arm='right', turn_deg=10, speed_m_s=.15)
+    _, preview = draft(client, service, 'bottle_upright_grasp_cap', pixel, arm='right', speed_m_s=.1,
+                       approach_speed_m_s=.1)
+    execute(client, service, preview)
+    assert service.bottle_cap['upright_phase'] == 'grasp'
+    # The synthetic backend has no object contact model; represent a cap held between the jaws.
+    service.backend.openings['right'] = 33.
+    [pixel] = observe_points(service, cap)
+    _, preview = draft(client, service, 'bottle_upright_twist', pixel, arm='right', turn_deg=10, cycles=1,
+                       speed_m_s=.1, approach_speed_m_s=.1)
     execute(client, service, preview)
     assert service.bottle_cap['state'] == 'completed'
     np.testing.assert_allclose(service.backend.state()['left']['xyz'], holder['xyz'])

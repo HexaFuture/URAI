@@ -16,7 +16,7 @@ def line_rotation(yaw_deg, tilt_deg, side):
 
 
 def solve_line_grasp(contact, yaw_deg, base_xy, clearance_m, compensation_m,
-                     probe, seed_joints, pose_tolerance=(10., 3.), min_tcp_z_m=None):
+                     probe, seed_joints, pose_tolerance=(10., 3.), min_tcp_z_m=None, *, tilts_deg=TILTS_DEG):
     """Keep both fingertips level. Try vertical then minimal tilt, seeded continuously.
 
     Probe the grasp first to avoid spending time on impossible orientations, then sample
@@ -35,7 +35,7 @@ def solve_line_grasp(contact, yaw_deg, base_xy, clearance_m, compensation_m,
     tol=np.minimum(np.asarray(pose_tolerance,dtype=float),[10.,3.])
     seeds=[initial, np.zeros(6)]
     tried=0
-    for tilt in TILTS_DEG:
+    for tilt in tilts_deg:
         for side in ([preferred] if tilt==0 else [preferred,-preferred]):
             rotation=line_rotation(yaw_deg,tilt,side)
             target=contact+rotation[:,1]*compensation_m

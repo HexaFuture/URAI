@@ -26,6 +26,13 @@ QUICK_START = {
          'gives': 'Starts the motion. Poll GET /api/state until execution.state is completed, error or cancelled.'},
     ],
     'finish': 'POST /api/home {"arms": ["left", "right"]} returns the arms to the all-zero joint pose.',
+    'one_call': {
+        'call': 'POST /api/skills/<name>/run',
+        'body': 'The usual skill arguments plus observation_id, a unique request_id, and wait_s (0..120).',
+        'gives': 'Plans, checks, executes and waits; 200 means terminal, 202 means still running. Check state/result.',
+        'resume': 'GET /api/skill-runs/<request_id>?wait_s=20 queries the same action after a timeout; '
+                  'never use a new ID to blindly replay an uncertain action.',
+    },
     'two_arms': 'Call POST /api/skills/<name> once per arm without commit and submit both drafts together with '
                 'PUT /api/draft {"observation_id": ..., "arms": {"left": ..., "right": ...}}, then steps 3 and 4. '
                 'Both task segments start together after both arms reach their start poses. A second PUT with '
@@ -33,7 +40,7 @@ QUICK_START = {
     'toss': 'Tossing is not a /api/skills/<name> call: POST /api/tasks queues pick-and-toss items, each planned, '
             'checked and executed in turn. Its fields are listed under the "toss" entry of GET /api/skills.',
     'motion': {
-        'moves_the_robot': ['POST /api/execute', 'POST /api/home', 'POST /api/tasks'],
+        'moves_the_robot': ['POST /api/execute', 'POST /api/home', 'POST /api/tasks', 'POST /api/skills/<name>/run'],
         'may_send_robot_commands': {
             'POST /api/preview': 'With auto_prepare.restore_can on (default), an arm in drag-teach mode or disabled by a '
                                  'protection stop is taken back under CAN control first: the service waits for both '
@@ -44,7 +51,7 @@ QUICK_START = {
                                  'observation when auto_prepare.refresh_observation is on) and then executed.',
         },
         'after_execute': 'When a drafted motion completes, the arms that moved return home automatically '
-                         '(except the bottle-cap stages that must keep holding the bottle).',
+                         '(except the bottle-cap, bag-panel, and agent-pouring stages that keep holding).',
         'stop': 'POST /api/cancel stops the motion and holds position. It is a software stop; keep the hardware '
                 'emergency stop within reach.',
     },

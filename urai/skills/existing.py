@@ -11,9 +11,10 @@ from .registry import boolean, choice, integer, number, register
 
 
 def transfer_arguments(ctx):
+    from ..far_transfer import grasp_options
     return {'table_z': ctx.table_z, 'fingertip_bias_mm': ctx.fingertip_bias_mm,
             'preferred_yaw_deg': ctx.preferred_yaw_deg, 'base_xy': ctx.base_xy,
-            'clearance_m': ctx.clearance_m, 'speed_m_s': ctx.speed_m_s}
+            'clearance_m': ctx.clearance_m, 'speed_m_s': ctx.speed_m_s, 'grasp_options': grasp_options(ctx)}
 
 
 @register(name='pick_place', label='两点抓放', group='抓取搬运', stroke='two_points',

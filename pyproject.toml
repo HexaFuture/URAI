@@ -24,6 +24,7 @@ dependencies = ["numpy>=1.24", "scipy>=1.10", "fastapi>=0.110", "uvicorn>=0.27",
 Paper = "https://arxiv.org/abs/2609.39018"
 
 [project.optional-dependencies]
+agent = ["requests>=2.31"]
 robot = ["piper_sdk>=0.6.2", "python-can>=4.3", "pyrealsense2>=2.55"]
 dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.6"]
 

@@ -26,7 +26,8 @@ def straight_spec():
 
 @pytest.mark.parametrize('host', ['127.0.0.1', '127.0.0.2', 'localhost', '[::1]'])
 def test_without_a_token_loopback_hosts_are_answered(sim_service, host):
-    response = make_client(sim_service, host=host).get('/api/state')
+    # Exercise the actual Host header without relying on TestClient's IPv6 URL parser.
+    response = make_client(sim_service).get('/api/state', headers={'Host': host})
     assert response.status_code == 200
     assert response.headers['cache-control'] == 'no-store'
 

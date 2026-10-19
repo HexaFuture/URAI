@@ -72,6 +72,8 @@ class Service:
         self.cancel_epoch = 0
         self.drop_point = None
         self.bottle_cap = None
+        from .pour_agent import PourAgent
+        self.pour_agent = PourAgent(self)
         self.tasks = TaskQueue(self)
         self.log_dir = Path(log_dir) if log_dir else None
         if self.log_dir:
@@ -116,6 +118,7 @@ class Service:
             result['cancel_epoch'] = self.cancel_epoch
             result['drop_point'] = copy.deepcopy(self.drop_point)
             result['bottle_cap'] = copy.deepcopy(self.bottle_cap)
+            result['pour_agent'] = self.pour_agent.status()
             result['task_queue'] = self.tasks.summary()
             if self.execution['state'] in ('error', 'cancelled'):
                 result['recovery_actions'] = [
@@ -249,6 +252,8 @@ class Service:
                 raise ValueError('Draft is too large')
             from .skills.bottle_cap import stage_metadata
             stage_metadata({'input_draft':draft})
+            from .skills.bag import stage_metadata as bag_metadata
+            bag_metadata({'input_draft':draft})
             self.draft = copy.deepcopy(draft); self.draft.pop('expected_revision',None)
             self.preview_data = None; self.revision += 1
             return {'revision': self.revision, 'draft': copy.deepcopy(self.draft)}
@@ -281,6 +286,8 @@ class Service:
                     preparation['restored_arms'] = sorted(set(preparation['restored_arms']+recovered['restored_arms']))
                     start = self.backend.state()
                     stale = self._observation_stale(start)
+                    if any('pour_agent' in a for a in draft['arms'].values()) and (stale or recovered['restored_arms']):
+                        raise ValueError('Pour landmarks cannot be rebound to another observation; re-observe')
                     if options['refresh_observation'] and (stale or recovered['restored_arms']):
                         progress(stage='refresh',arm=None,done=0,total=1)
                         frame = self.backend.capture()
@@ -302,8 +309,14 @@ class Service:
                     progress(stage='compile',arm=None,done=0,total=1)
                     from .skills.bottle_cap import validate_stage, PRECISION
                     cap_metadata=validate_stage(self, {'input_draft':draft}, start)
+                    from .pour_agent import PRECISION as POUR_PRECISION
+                    if self.pour_agent.validate({'input_draft':draft},start):
+                        tolerance={k:min(tolerance[k],v) for k,v in POUR_PRECISION.items()}
                     if cap_metadata:
                         tolerance = {k:min(tolerance[k],v) for k,v in PRECISION.items()}
+                    from .skills.bag import stage_metadata as bag_metadata, PRECISION as BAG_PRECISION
+                    if bag_metadata({'input_draft':draft}):
+                        tolerance={k:min(tolerance[k],v) for k,v in BAG_PRECISION.items()}
                     if cap_metadata and cap_metadata['stage']=='place' and cap_metadata.get('worker'):
                         from .bottle_place import plan as plan_bottle_place
                         plan=plan_bottle_place(self.backend,draft,start,cap_metadata,tolerance,profile,progress)
@@ -430,6 +443,7 @@ class Service:
                 raise ValueError('Preview expired; generate a new preview')
             from .skills.bottle_cap import validate_stage
             validate_stage(self, p, self.backend.state())
+            self.pour_agent.validate(p,self.backend.state())
             self.backend.validate_start(p['start'])
             self.preview_data = None
             p['task'] = copy.deepcopy(task)
@@ -481,8 +495,13 @@ class Service:
 
     def _run(self, plan):
         cap_stage = None
+        pour_stage = None
+        bag_stage = None
         last_holder_check = [0.]
         def progress(fraction, elapsed):
+            if pour_stage and time.monotonic()-last_holder_check[0] >= .1:
+                self.pour_agent.check_grip(pour_stage)
+                last_holder_check[0] = time.monotonic()
             if cap_stage and cap_stage["stage"] == "twist" and time.monotonic()-last_holder_check[0] >= .1:
                 from .skills.bottle_cap import held_session
                 held_session(self, self.backend.state(), active_hold=bool(cap_stage.get('active_holder')))
@@ -493,6 +512,9 @@ class Service:
         try:
             from .skills.bottle_cap import validate_stage, complete_stage
             cap_stage = validate_stage(self, plan, self.backend.state())
+            pour_stage = self.pour_agent.validate(plan,self.backend.state())
+            from .skills.bag import stage_metadata as bag_metadata
+            bag_stage = bag_metadata(plan)
             if plan.get('sequence'):
                 from .bottle_place import execute as execute_bottle_place
                 def phase_changed(label):
@@ -500,11 +522,11 @@ class Service:
                 result=execute_bottle_place(self.backend,plan,self.cancel_event,progress,phase_changed)
             else:
                 result = self.backend.execute(plan, plan['start'], self.cancel_event, progress)
-            if cap_stage and not result.get('completed'):
-                raise ValueError('拧瓶盖阶段未完成，保持当前位置')
+            if (cap_stage or pour_stage or bag_stage) and not result.get('completed'):
+                raise ValueError('阶段未完成，保持当前位置')
             if self.cancel_event.is_set():
                 raise Cancelled()
-            if plan.get('kind') != 'home' and result.get('completed') and (not cap_stage or cap_stage['stage']=='place'):
+            if plan.get('kind') != 'home' and result.get('completed') and (not cap_stage or cap_stage['stage']=='place') and not pour_stage and not bag_stage:
                 with self.lock:
                     self.execution.update(stage='return_home', progress=0.)
                     tolerance = copy.deepcopy(self.pose_tolerance)
@@ -539,21 +561,43 @@ class Service:
                     raise ValueError('技能已完成，但自动回位未完成')
             with self.lock:
                 complete_stage(self,plan)
+                if pour_stage:
+                    self.pour_agent.completed(pour_stage)
+                    result['holding_position']=True
+                    result['pour_agent']=self.pour_agent.status()
                 if cap_stage:
                     result['bottle_cap'] = copy.deepcopy(self.bottle_cap)
                     result['holding_position'] = cap_stage['stage']!='place'
+                if bag_stage:
+                    result["holding_position"] = True
+                    result["bag_open_verified"] = False
+                    result["bag_flap"] = copy.deepcopy(bag_stage)
                 self.execution.update(state='completed', progress=1., result={k: v for k, v in result.items() if k != 'trace'})
                 self._clear_executed_draft(plan)
                 final_execution = copy.deepcopy(self.execution)
         except Cancelled:
             with self.lock:
                 self.bottle_cap = None
+                if pour_stage:self.pour_agent.failed('cancelled')
                 self.execution.update(state='cancelled')
                 final_execution = copy.deepcopy(self.execution)
         except Exception as exc:
+            from .empty_grasp import EmptyGraspError, recover_empty_grasp
+            if isinstance(exc,EmptyGraspError) and not (cap_stage or pour_stage or bag_stage):
+                try:
+                    result=recover_empty_grasp(self,plan,exc,progress)
+                    final_execution=copy.deepcopy(self.execution)
+                    return
+                except Cancelled:
+                    with self.lock:self.execution.update(state='cancelled')
+                    final_execution=copy.deepcopy(self.execution)
+                    return
+                except Exception as recovery_error:
+                    exc=RuntimeError(f'{exc}；自动回位未完成：{recovery_error}')
             with self.lock:
                 from .skills.bottle_cap import failed_stage
                 failed_stage(self,plan,exc)
+                if pour_stage:self.pour_agent.failed(exc)
                 self.execution.update(state='error', error=str(exc))
                 final_execution = copy.deepcopy(self.execution)
         finally:

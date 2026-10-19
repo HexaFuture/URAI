@@ -218,9 +218,15 @@ def test_the_lift_waits_for_arrival_and_a_holding_opening(piper_backend, opening
         assert lifted.wall >= gripped.wall+.8              # the lift waits out the whole grip hold
     else:
         began = time.monotonic()
-        with pytest.raises(RuntimeError, match='夹爪疑似空抓'):
+        from urai.empty_grasp import EmptyGraspError
+        expected = EmptyGraspError if opening <= 1.5 else RuntimeError
+        with pytest.raises(expected, match='夹爪'):
             run(piper_backend, plan, recorder=recorder)
-        assert time.monotonic()-began > 1.3+3.             # the check is given its full three seconds
+        elapsed = time.monotonic()-began
+        if opening <= 1.5:
+            assert 1.3 < elapsed < 3.  # Confirmed empty jaws abort after the completed close dwell.
+        else:
+            assert elapsed > 1.3+3.  # Unresolved opening still receives the full timeout.
         assert max(row.joints[0] for row in recorder.rows) < 10.5   # and the arm never lifted
         assert drift_deg(rt) < .05
 
@@ -232,7 +238,7 @@ def test_a_final_grip_check_cannot_let_the_motion_finish_early(piper_backend):
     began = time.monotonic()
     with pytest.raises(RuntimeError, match='夹爪'):
         run(piper_backend, plan)
-    assert time.monotonic()-began > 3.
+    assert .2 < time.monotonic()-began < 1.2
 
 
 def test_an_opening_is_commanded_and_waited_out_never_gated_on_the_measured_width(piper_backend):

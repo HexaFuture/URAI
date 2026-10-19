@@ -59,14 +59,20 @@ robot moved since the observation and `auto_prepare.refresh_observation` is off,
 
 | Method and path | Body | Effect |
 | --- | --- | --- |
+| `POST /api/skills/{name}/run` | skill arguments plus `observation_id`, unique `request_id`, optional `wait_s` (0–120) | Plans, checks, executes and waits. Returns 200 for a terminal state or 202 while running. Check the returned state, not just HTTP status. |
+| `GET /api/skill-runs/{request_id}?wait_s=20` | — | Retrieves the existing action; identical IDs and arguments never execute twice. `unknown`/`not_found` requires reconciliation before retrying. |
 | `POST /api/preview` | `{expected_revision?, expected_cancel_epoch?}` | Plans the draft: automatic approach routes, IK, retiming to the motion profile, then joint limits, table, self-collision and inter-arm checks on a 40 ms grid. **May send CAN commands** to restore control (see [safety.md](safety.md#3-what-moves-the-robot)). Returns the plan with `id`, per-arm samples, `duration_s`, `notes`. |
-| `POST /api/execute` | `{preview_id, cancel_epoch?}` | Executes the preview (regenerating it first if it is older than 120 s). Returns at once; poll `GET /api/state`. After a completed drafted motion the arms that moved return home, except during bottle-cap holding stages. |
+| `POST /api/execute` | `{preview_id, cancel_epoch?}` | Executes the preview (regenerating it first if it is older than 120 s). Returns at once; poll `GET /api/state`. After a completed drafted motion the arms that moved return home, except during bottle-cap, bag-panel, and agent-pouring holding stages. |
 | `POST /api/home` | `{arms: ["left","right"], open_grippers: true, cancel_epoch?}` | Plans and executes a return to the all-zero joint pose. |
 | `POST /api/tasks` | see the `toss` entry of `GET /api/skills` | Queues pick-and-place or pick-and-toss items and runs them one after another. `GET /api/tasks` reports progress, `DELETE /api/tasks` stops the queue. |
 | `POST /api/cancel` | — | Software stop: stop streaming and hold the measured pose. |
 | `POST /api/recover` | — | Acknowledge an error or cancellation without moving. |
 
 ## Execution states
+
+Agent-assisted pouring also exposes `GET /api/pour-agent` for its schemas and `POST /api/pour-agent/start`,
+`/observe`, `/plan`, and `/return`. These calls do not move the robot; their drafts use the normal preview and
+execute pipeline. See [agent-pouring.md](agent-pouring.md) for fresh-image requirements and rim alignment.
 
 `execution.state` is one of `idle`, `planning`, `ready` (a preview exists), `running`, `cancelling`, `completed`,
 `cancelled`, `error`. While `planning`, `stage` and `progress` describe the planner (`prepare`, `refresh`,

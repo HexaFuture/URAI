@@ -8,7 +8,9 @@ from urai.service import Service
 #: The tools of this release, as the catalogue lists them.
 RELEASED = {'pick_place', 'grasp_line', 'pour', 'carry_line', 'bottle_cap_prepare', 'bottle_cap_twist',
             'bottle_cap_retract', 'bottle_cap_place', 'toss', 'bottle_upright_prepare',
-            'bottle_upright_twist', 'bottle_upright_retract', 'bottle_upright_release', 'bottle_body_recenter'}
+            'bottle_upright_twist', 'bottle_upright_retract', 'bottle_upright_release', 'bottle_body_recenter',
+            'bag_flap_grasp', 'bag_panel_lift', 'pour_agent_prepare', 'bottle_upright_grasp_cap',
+            'bottle_upright_take_cap', 'bottle_upright_place_cap', 'bottle_upright_return'}
 
 CUP = (210, 242, 380, 412, .94)      # 60 mm tall at 1 m table depth
 BOWL = (300, 332, 500, 532, .97)     # 30 mm tall

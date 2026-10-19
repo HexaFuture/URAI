@@ -71,7 +71,13 @@ class PiperBackend(PiperPlanner):
         """One RGB-D frame of ``camera`` ('head', 'hand_left' or 'hand_right') in world coordinates."""
         with self.capture_lock:
             f = self.runtime.capture(camera)
-        return Frame(f.rgb, f.depth_m, f.k, f.t_world_cam)
+        # Public camera timestamps use epoch seconds; expose a monotonic age
+        # reference for the pouring loop without making an old image fresh.
+        stamp = getattr(f, 'timestamp', 0.)
+        sensor_timestamp = time.monotonic() - (time.time() - stamp) if stamp > 0 else None
+        seq = getattr(f, 'seq', -1)
+        return Frame(f.rgb, f.depth_m, f.k, f.t_world_cam,
+                     sensor_timestamp=sensor_timestamp, sensor_sequence=seq if seq >= 0 else None)
 
     @contextmanager
     def _exclusive(self):
@@ -231,7 +237,21 @@ class PiperBackend(PiperPlanner):
 
     def execute(self, plan, start, cancel, progress):
         with self._exclusive():
-            return self._execute(plan, start, cancel, progress)
+            from ..home_recovery import HomeClearanceRecovery
+            info = plan.get('home_clearance_recovery')
+            recovery = None
+            if info is not None:
+                if list(plan['arms']) != [info['arm']] or any(p.get('route') != 'home' or p['gripper_events'] for p in plan['arms'].values()):
+                    raise ValueError('Invalid home recovery plan')
+                recovery = HomeClearanceRecovery(info['start_mm'], feedback=True)
+            self._home_clearance_recovery = recovery
+            try:
+                result = self._execute(plan, start, cancel, progress)
+                if recovery is not None:
+                    recovery.finish()
+                return result
+            finally:
+                self._home_clearance_recovery = None
 
     def _read_control_feedback(self, active, cancel, retry_budget):
         """Discard a late sample, hold, and retry once; never dispatch from stale geometry."""
@@ -347,8 +367,15 @@ class PiperBackend(PiperPlanner):
                             gate_index+=1;gate_started=None;gate_settled=None
                             approach_wait=now-started-t
                     else:gate_settled=None
+                    if (kind=='holding' and gate_started is not None and now-gate_started>.3
+                            and residual<.7 and np.isfinite(opening) and 0<=opening<=1.5):
+                        from ..empty_grasp import EmptyGraspError
+                        raise EmptyGraspError(gate_arm,opening)
                     if gate_started is not None and now-gate_started>3:
                         if kind=='arrival':raise RuntimeError(f'{gate_arm}：抓取／放置位置未到达（关节误差 {residual:.2f}°）')
+                        if np.isfinite(opening) and 0<=opening<=1.5:
+                            from ..empty_grasp import EmptyGraspError
+                            raise EmptyGraspError(gate_arm,opening)
                         raise RuntimeError(f'{gate_arm}：夹爪疑似空抓或未闭合（反馈 {opening:.1f} mm），已停止后续搬运')
                 target = {}
                 for a in ARMS:
